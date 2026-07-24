@@ -1,7 +1,7 @@
 #ifndef POLY_H
 
 #define POLY_H
-#include "libmontmul/montmul.h"
+#include "../libmontmul/montmul.h"
 
 typedef struct Poly{
     uint64_t deg2;
