@@ -21,7 +21,7 @@ Poly mulPoly(Poly multiplier, Poly multiplicand, ModEntry modEntry, uint64_t int
         ZETA = montmul(addmod(multiplier1, multiplier0, modulus),
             addmod(multiplicand1, multiplicand0, modulus), modEntry),
         ETA = montmul(addmod(multiplier2, multiplier0, modulus),
-            addmod(multiplicand2, multiplicand0, modulus)),
+            addmod(multiplicand2, multiplicand0, modulus), modEntry),
         THETA = submod(submod(EPSILON, ALPHA, modulus), BETA, modulus),
         IOTA = montmul(int_6k, THETA, modEntry);
 
@@ -32,7 +32,7 @@ Poly mulPoly(Poly multiplier, Poly multiplicand, ModEntry modEntry, uint64_t int
 
 }
 
-Poly mulPolyConst(Poly mutliplier, uint64_t multiplicand, ModEntry modEntry) {
+Poly mulPolyConst(Poly multiplier, uint64_t multiplicand, ModEntry modEntry) {
     return makePoly(montmul(multiplier.deg2, multiplicand, modEntry),
         montmul(multiplier.deg1, multiplicand, modEntry),
         montmul(multiplier.deg0, multiplicand, modEntry));
@@ -46,14 +46,14 @@ Poly getMonicPoly(Poly operand, ModEntry modEntry) {
         multiplier = invmod(deg2, modEntry);
     }
     else if (deg2 == 0 && deg1 > 1) {
-        multiplier = invmod(deg1, modEntry)
+        multiplier = invmod(deg1, modEntry);
     }
     return mulPolyConst(operand, multiplier, modEntry);
 }
 
 Poly getRootPoly(ModEntry modEntry, uint64_t int_6k, uint64_t offset) {
     const uint64_t prime = modEntry.modulus;
-    uint64_t exponent = (prime-1)/2
+    uint64_t exponent = (prime-1)/2;
     Poly base = makePoly(0, 1, (offset == 0) ? 0 : prime - offset);
     Poly result = makePoly(0, 0, 1);
 
