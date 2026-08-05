@@ -1,5 +1,5 @@
 CC       := gcc
-CFLAGS   := -Wall -Wextra -I include -I lib -MMD -MP -O3
+CFLAGS   := -Wall -Wextra -I include -I lib -MMD -MP -O3 -fopenmp
  
 TARGET   := build/main
  
@@ -26,7 +26,7 @@ $(TARGET): $(OBJS)
 # Compile any .c to build/*.o
 build/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -lm
  
 clean:
 	rm -rf build

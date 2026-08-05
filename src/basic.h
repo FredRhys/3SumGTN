@@ -8,6 +8,7 @@
 #include <stdbit.h>
 #include <math.h>
 #include <stddef.h>
+#include <stdio.h>
 
 // functions from factor64
 int initfactor64(const char*);
