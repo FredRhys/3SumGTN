@@ -2,6 +2,7 @@
 
 #define POLY_H
 #include "../libmontmul/montmul.h"
+#include <inttypes.h>
 
 typedef struct Poly{
     uint64_t deg2;
