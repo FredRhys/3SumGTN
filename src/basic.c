@@ -117,7 +117,7 @@ bool tryBasic(uint64_t k) {
     uint64_t _6k = 6 * k;
     __int128_t dividend = -1;
 	for (int64_t z = negBound; dividend <= 0 && !result; z++) {
-		dividend = (__uint128_t)z * z * z - z - (__int128_t)_6k;
+		dividend = (__int128_t)z * z * z - z - (__int128_t)_6k;
 		if (checkFormulaDividend(dividend)) {result = true;}
 	}
 	return result;
