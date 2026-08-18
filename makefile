@@ -2,12 +2,13 @@ CC = gcc
 LD = $(CC)
 CFLAGS = -std=c23\
 		 -g\
-		 -Wall\
-		 -pedantic\
+		 -fsanitize=address\
 		 -fsanitize=undefined\
-		 -fsanitize=address
+		 -Wall\
+		 -O2\
+		 -pedantic
 
-build/main: factor64/factor64.o build/basic.o
+build/main: build/main.o factor64/factor64.o build/basic.o
 	$(LD) $(CFLAGS) build/main.o factor64/factor64.o build/basic.o -o build/main -lm
 
 build/main.o: src/main.c
@@ -18,3 +19,7 @@ factor64/factor64.o:
 
 build/basic.o:  src/basic.c
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
+
+.PHONY: clean
+clean:
+	rm $(build/*)
