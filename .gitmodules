@@ -3,4 +3,4 @@
 	url = https://github.com/FredRhys/libmontmul
 [submodule "factor64"]
 	path = factor64
-	url = https://github.com/arbooker/factor64
+	url = https://github.com/FredRhys/factor64
