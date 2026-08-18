@@ -8,8 +8,11 @@ CFLAGS = -std=c23\
 		 -O2\
 		 -pedantic
 
-build/main: build/main.o factor64/factor64.o build/basic.o
+build/main: build build/main.o factor64/factor64.o build/basic.o
 	$(LD) $(CFLAGS) build/main.o factor64/factor64.o build/basic.o -o build/main -lm
+
+build:
+	mkdir build
 
 build/main.o: src/main.c
 	$(LD) $(CFLAGS) -c src/main.c -o build/main.o
