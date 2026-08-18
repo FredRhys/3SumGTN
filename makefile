@@ -1,34 +1,25 @@
-CC       := gcc
-CFLAGS   := -Wall -Wextra -I include -I lib -MMD -MP -O3 -fopenmp
- 
-TARGET   := build/main
- 
-# Source files
-SRCS     := src/main.c \
-			src/basic.c\
-			src/poly.c \
-			libmontmul/montmul.c\
-			factor64/factor64.c
- 
-# Object files (all go into build/)
-OBJS     := $(patsubst %.c,build/%.o,$(SRCS))
-DEPS     := $(OBJS:.o=.d)
- 
-.PHONY: all test clean
- 
-all: $(TARGET)
- 
-$(TARGET): $(OBJS)
-	@mkdir -p $(dir $@)
-	$(CC) $^ -o $@ -lm
+CC = gcc
+LD = $(CC)
+CFLAGS = -std=c23\
+		 -g\
+		 -fsanitize=address\
+		 -fsanitize=undefined\
+		 -Wall\
+		 -O2\
+		 -pedantic
 
- 
-# Compile any .c to build/*.o
-build/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@ -lm
- 
+build/main: build/main.o factor64/factor64.o build/basic.o
+	$(LD) $(CFLAGS) build/main.o factor64/factor64.o build/basic.o -o build/main -lm
+
+build/main.o: src/main.c
+	$(LD) $(CFLAGS) -c src/main.c -o build/main.o
+
+factor64/factor64.o:
+	cd factor64 && $(MAKE) factor64.o
+
+build/basic.o:  src/basic.c
+	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
+
+.PHONY: clean
 clean:
-	rm -rf build
- 
--include $(DEPS)
+	rm $(build/*)

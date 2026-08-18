@@ -1,7 +1,6 @@
-#include "poly.h"
 #include "basic.h"
 
 int main(void) {
-    (void)tryBasic(0);
+    fprintf(stdout, "%d\n", tryBasic(1));
     return 0;
 }
