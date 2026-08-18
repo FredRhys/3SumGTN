@@ -1,6 +1,3 @@
 [submodule "libmontmul"]
 	path = libmontmul
 	url = https://github.com/FredRhys/libmontmul
-[submodule "factor64"]
-	path = factor64
-	url = https://github.com/arbooker/factor64
