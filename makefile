@@ -7,20 +7,14 @@ CFLAGS = -std=c23\
 		 -fsanitize=undefined\
 		 -fsanitize=address
 
-.PHONY: build/main
-build/main: build/main.o factor64/factor64.o build/basic.o
+build/main: factor64/factor64.o build/basic.o
 	$(LD) $(CFLAGS) build/main.o factor64/factor64.o build/basic.o -o build/main -lm
 
-.PHONY: build/main.o
-build/main.o: src/main.c src/poly.h
+build/main.o: src/main.c
 	$(LD) $(CFLAGS) -c src/main.c -o build/main.o
 
-.PHONY: factor64/factor64.o
 factor64/factor64.o:
-	cd factor64
-	make
-	cd ..
+	cd factor64 && $(MAKE) factor64.o
 
-.PHONY: build/basic.o
-build/basic.o: src/basic.c
+build/basic.o:  src/basic.c
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
