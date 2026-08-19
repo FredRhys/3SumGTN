@@ -2,7 +2,7 @@ CC = gcc
 LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
-		 -O2\
+		 -O3\
 		 -pedantic
 # 		 -g\
 # 		 -fsanitize=address\
