@@ -112,10 +112,6 @@ bool checkFormulaDividend(__int128_t dividend) {
 }
 
 bool tryBasic(uint64_t k) {
-	if (initfactor64("factor64/factor.bin") < 0) {
-		fprintf(stderr, "Cannot read factor data\n");
-		return -1;
-	}
 	bool result = false;
 	int64_t negBound = -2 * sqrtl(k);
     int64_t _6k = 6 * k;
