@@ -26,3 +26,5 @@ build/basic.o:  src/basic.c
 .PHONY: clean
 clean:
 	rm $(build/*)
+
+default: build/main
