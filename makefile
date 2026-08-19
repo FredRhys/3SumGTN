@@ -25,6 +25,6 @@ build/basic.o:  src/basic.c
 
 .PHONY: clean
 clean:
-	rm $(build/*)
+	rm $(wildcard build/*)
 
 default: build/main
