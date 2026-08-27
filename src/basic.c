@@ -63,13 +63,13 @@ bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d, ui
 	z = adjustSolutions(z);
 	int64_t x = (divisor+formulaSqrt)/2;
 	int64_t y = ((int64_t)divisor - (int64_t)formulaSqrt)/2;
-	if (dividend < 0) {
+	if (dividend > 0) {
 		x = -x;
 		y = -y;
 	}
 	x = adjustSolutions(x);
 	y = adjustSolutions(y);
-	(void)fprintf(resultsDotTxt, "%ld & %ld & %ld & %ld\n", k, x, y, z);
+	(void)fprintf(resultsDotTxt, "%ld : %ld / %ld / %ld\n", k, x, y, z);
 	return true;
 }
 
