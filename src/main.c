@@ -6,6 +6,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+void createResultsTxt() {
+    FILE* f = fopen("results.txt", "w"); //creates blank results.txt file.
+    fclose(f);
+}
+
 int main(int argc, char** argv) {
     if (argc != 3) {return -1;}
     if (initfactor64("factor64/factor.bin") < 0) {
@@ -14,10 +19,15 @@ int main(int argc, char** argv) {
 	}
     const uint64_t RANGE = atoll(argv[1]);
     const uint16_t THREADS = atoi(argv[2]);
-    #pragma omp parallel for num_threads(THREADS)
-    for (uint64_t i = 0; i <= RANGE; i++) {
-        if (tryBasic(i)) {continue;}
-        fprintf(stdout, "Failed to solve for %"PRIu64"\n", i);
+    (void)createResultsTxt();
+    FILE* f = fopen("results.txt", "a");
+    {
+        #pragma omp parallel for num_threads(THREADS)
+        for (uint64_t i = 0; i <= RANGE; i++) {
+            if (tryBasic(i)) {continue;}
+            fprintf(f, "Fail: %"PRIu64"\n", i);
+        }
     }
+    fclose(f);
     return 0;
 }
