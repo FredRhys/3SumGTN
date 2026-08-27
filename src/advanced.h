@@ -2,9 +2,10 @@
 #define ADVANCED_H
 #include <primesieve.h>
 #include "poly.h"
-#include "../libmontmul.h" // this is included by poly.h
+#include "../libmontmul/montmul.h" // this is included by poly.h
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 // global variables
 extern FILE* resultsDotTxt;

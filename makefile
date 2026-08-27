@@ -8,8 +8,8 @@ CFLAGS = -std=c23\
 # 		 -fsanitize=address\
 # 		 -fsanitize=undefined\
 
-build/main: build build/main.o factor64/factor64.o build/basic.o
-	$(LD) $(CFLAGS) -fopenmp build/main.o factor64/factor64.o build/basic.o -o build/main -lm
+build/main: build build/main.o factor64/factor64.o build/basic.o build/advanced.o
+	$(LD) $(CFLAGS) -fopenmp build/main.o factor64/factor64.o build/basic.o -o build/main -lm -lprimesieve
 
 build:
 	mkdir build
@@ -20,8 +20,11 @@ build/main.o: src/main.c
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
 
-build/basic.o:  src/basic.c
+build/basic.o: src/basic.c
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
+
+build/advanced.o: src/advanced.c
+	$(LD) $(CFLAGS) -c src/advanced.c -o build/advanced.o
 
 .PHONY: clean
 clean:
