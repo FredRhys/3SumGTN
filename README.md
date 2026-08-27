@@ -2,7 +2,7 @@
 
 A reimplementation of [my master's thesis code](https://github.com/FredRhys/4th-year-diss-code), made without deadline stress.
 
-This program seeks integer solutions to the equation ![equation](https://latex.codecogs.com/svg.image?&space;\left(\begin{matrix}x&space;&space;\\&space;3\end{matrix}\right)&plus;\left(\begin{matrix}y&space;&space;\\&space;3\end{matrix}\right)&plus;\left(\begin{matrix}z&space;&space;\\&space;3\end{matrix}\right)=k) for given $k$.
+This program seeks integer solutions to the equation ![equation](https://latex.codecogs.com/svg.image?\binom{x}{3}&plus;\binom{y}{3}&plus;\binom{z}{3}=k) for given $k$.
 
 For a full explanation, see [my thesis](https://drive.google.com/file/d/1LHM9BBNr0isWwWY-byo3zMEb0KBxi436/view?usp=sharing). I intend to update this over time, so please offer any feedback in the form of comments on the document :)
 
