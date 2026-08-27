@@ -9,13 +9,13 @@ CFLAGS = -std=c23\
 # 		 -fsanitize=undefined\
 
 build/main: build build/main.o factor64/factor64.o build/basic.o
-	$(LD) $(CFLAGS) build/main.o factor64/factor64.o build/basic.o -o build/main -lm
+	$(LD) $(CFLAGS) -fopenmp build/main.o factor64/factor64.o build/basic.o -o build/main -lm
 
 build:
 	mkdir build
 
 build/main.o: src/main.c
-	$(LD) $(CFLAGS) -c src/main.c -o build/main.o
+	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o

@@ -16,7 +16,11 @@ Currently, only the `basic` algorithm is implemented. The program tries to find 
 Credit to AR Booker for the original [```factor64```](https://github.com/arbooker/factor64). [My fork](https://github.com/FredRhys/factor64) was made only to provide a ```.gitignore```. Credit also to him for being my supervisor during the original project. All other code is my own.
 
 ## Technical Aspects
-This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile. Running ```build/main``` will perform the search. [CodeCogs](https://editor.codecogs.com/) was used for Latex rendering in ```README.md```.
+This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile.
+
+Running ```build/main RANGE THREADS``` will perform the search from 1 to ```RANGE``` using ```THREADS``` threads. For clarity, I used ```build/main 1000000 12``` for testing.
+
+[CodeCogs](https://editor.codecogs.com/) was used for Latex rendering in ```README.md```.
 
 ## Fun Facts
 - The smallest integer the basic algorithm can't find a solution to is 107 = (&minus;393)C3 + (328)C3 + (298)C3.
