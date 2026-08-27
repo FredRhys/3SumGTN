@@ -30,6 +30,6 @@ int main(int argc, char** argv) {
             (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
         }
     }
-    fclose(f);
+    fclose(resultsDotTxt);
     return 0;
 }
