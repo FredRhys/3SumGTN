@@ -1,19 +1,23 @@
+// Includes
 #include "basic.h"
+#include <omp.h>
+#include <stdlib.h> // for atoll
 // these are included in basic.h but I thought it best to include them here for completeness
 #include <stdio.h>
 #include <inttypes.h>
-#define RANGE 1000000
 
-int main(void) {
+int main(int argc, char** argv) {
+    if (argc != 3) {return -1;}
     if (initfactor64("factor64/factor.bin") < 0) {
 		fprintf(stderr, "Cannot read factor data\n");
 		return -1;
 	}
-    uint64_t count = 0;
+    const uint64_t RANGE = atoll(argv[1]);
+    const uint16_t THREADS = atoi(argv[2]);
+    #pragma omp parallel for num_threads(THREADS)
     for (uint64_t i = 0; i <= RANGE; i++) {
         if (tryBasic(i)) {continue;}
-        count++;
+        fprintf(stdout, "Failed to solve for %"PRIu64"\n", i);
     }
-    fprintf(stdout, "Failed to represent %"PRIu64" integers in the specified range.\n", count);
     return 0;
 }
