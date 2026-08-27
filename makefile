@@ -2,7 +2,7 @@ CC = gcc
 LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
-		 -O3\
+		 -Ofast\
 		 -pedantic
 # 		 -g\
 # 		 -fsanitize=address\
@@ -15,7 +15,7 @@ build:
 	mkdir build
 
 build/main.o: src/main.c
-	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
+	$(LD) $(CFLAGS) -fopenmp  -c src/main.c -o build/main.o
 
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
