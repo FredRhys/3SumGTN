@@ -53,7 +53,6 @@ bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d) {
 	//uint64_t formulaSqrt;
 	if (sqrtand * _3d != disc) {return false;}
 	if ((divisor & 1) != (sqrtand & 1)) {return false;}
-	//if (!checkModSmallPrimes(sqrtand, 1)) {return false;}
     return iSqrt128(sqrtand, NULL);
 
 	//if (!iSqrt128(sqrtand, &formulaSqrt)) {return 0;}

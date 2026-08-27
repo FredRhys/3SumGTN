@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+FILE* resultsDotTxt;
+
 void createResultsTxt() {
     FILE* f = fopen("results.txt", "w"); //creates blank results.txt file.
     fclose(f);
@@ -20,7 +22,7 @@ int main(int argc, char** argv) {
     const uint64_t RANGE = atoll(argv[1]);
     const uint16_t THREADS = atoi(argv[2]);
     (void)createResultsTxt();
-    FILE* f = fopen("results.txt", "a");
+    resultsDotTxt = fopen("results.txt", "a");
     {
         #pragma omp parallel for num_threads(THREADS)
         for (uint64_t i = 0; i <= RANGE; i++) {
