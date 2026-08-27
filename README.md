@@ -2,7 +2,7 @@
 
 A reimplementation of [my master's thesis code](https://github.com/FredRhys/4th-year-diss-code), made without deadline stress.
 
-This program seeks integer solutions to the equation $\binom{x}{3}+\binom{y}{3}+\binom{z}{3}=k$ for given $k$.
+This program seeks integer solutions to the equation ![equation](https://latex.codecogs.com/svg.image?&space;\left(\begin{matrix}x&space;\\&space;3\end{matrix}\right)&plus;\left(\begin{matrix}y&space;\\&space;3\end{matrix}\right)&plus;\left(\begin{matrix}z&space;\\&space;3\end{matrix}\right)=k) for given $k$.
 
 For a full explanation, see [my thesis](https://drive.google.com/file/d/1LHM9BBNr0isWwWY-byo3zMEb0KBxi436/view?usp=sharing). I intend to update this over time, so please offer any feedback in the form of comments on the document :)
 
@@ -12,7 +12,7 @@ Currently, only the `basic` algorithm is implemented. The program tries to find 
 Credit to AR Booker for the original [```factor64```](https://github.com/arbooker/factor64). [My fork](https://github.com/FredRhys/factor64) was made only to provide a ```.gitignore```. Credit also to him for being my supervisor during the original project. All other code is my own.
 
 ## Technical Aspects
-This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile. Running ```build/main``` will perform the search.
+This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile. Running ```build/main``` will perform the search. [CodeCogs](https://editor.codecogs.com/) was used for Latex rendering in ```README.md```.
 
 ## Fun Facts
 - The smallest integer the basic algorithm can't find a solution to is $107=\binom{-393}{3}+\binom{328}{3}+\binom{298}{3}$.
