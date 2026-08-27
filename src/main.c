@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
         #pragma omp parallel for num_threads(THREADS)
         for (uint64_t i = 0; i <= RANGE; i++) {
             if (tryBasic(i)) {continue;}
-            (void)fprintf(f, "Fail: %"PRIu64"\n", i);
+            (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
         }
     }
     fclose(f);
