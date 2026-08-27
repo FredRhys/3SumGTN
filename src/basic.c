@@ -47,34 +47,33 @@ __uint128_t abs128(__int128_t operand) {
 	return operand >= 0 ? operand : -operand;
 }
 
-bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d) {
-	__int128_t disc = 4 * (divisor+abs128(dividend)) - (__int128_t)divisor * divisor * divisor;
-	int64_t sqrtand = disc/_3d;
-	//uint64_t formulaSqrt;
-	if (sqrtand * _3d != disc) {return false;}
-	if ((divisor & 1) != (sqrtand & 1)) {return false;}
-    return iSqrt128(sqrtand, NULL);
-
-	//if (!iSqrt128(sqrtand, &formulaSqrt)) {return 0;}
-	// z = (z==0 || z==1) ? 0 : z+1;
-	// int64_t x = (divisor+formulaSqrt)/2;
-	// int64_t y = ((int64_t)divisor - (int64_t)formulaSqrt)/2;
-	// x *= (dividend > 0) ? 1 : -1;
-	// y *= (dividend > 0) ? 1 : -1;
-	// x = (x==0 || x==1) ? 0 : x+1;
-	// y = (y==0 || y==1) ? 0 : y+1;
-	// FILE* f = fopen("reps.txt", "a");
-	// fprintf(f, "%ld & %ld & %ld & %ld\n", int_6k / 6, x, y, z);
-	// fclose(f);
-	// if (abs128(z) >= abs128(biggest_z)) {
-	// 	biggest_z = z;
-	// 	biggest_y = y;
-	// 	biggest_x = x;
-	// }
-	//return 1;
+int64_t adjustSolutions(int64_t operand) {
+	return (operand == 0 || operand == 1) ? 0 : operand + 1;
 }
 
-bool checkFormulaDividend(__int128_t dividend) {
+bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d, uint64_t k, int64_t z) {
+	__int128_t disc = 4 * (divisor+abs128(dividend)) - (__int128_t)divisor * divisor * divisor;
+	int64_t sqrtand = disc/_3d;
+	if (sqrtand * _3d != disc) {return false;}
+	if ((divisor & 1) != (sqrtand & 1)) {return false;}
+	uint64_t formulaSqrt;
+    if (!iSqrt128(sqrtand, &formulaSqrt)) {return false;}
+
+	// printing results
+	z = adjustSolutions(z);
+	int64_t x = (divisor+formulaSqrt)/2;
+	int64_t y = ((int64_t)divisor - (int64_t)formulaSqrt)/2;
+	if (dividend < 0) {
+		x = -x;
+		y = -y;
+	}
+	x = adjustSolutions(x);
+	y = adjustSolutions(y);
+	(void)fprintf(resultsDotTxt, "%ld & %ld & %ld & %ld\n", k, x, y, z);
+	return true;
+}
+
+bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 	int primeFactorCount, exponents[15];
 	uint64_t primeFactors[15];
 	const __uint128_t absDividend = abs128(dividend);
@@ -98,7 +97,7 @@ bool checkFormulaDividend(__int128_t dividend) {
 			for (uint32_t multiplicandIndex = 0; multiplicandIndex <= multiplicandLimIndex; multiplicandIndex++) {
 				nextDivisor = base * divisors[multiplicandIndex];
 				//if (nextDivisor > DIVBOUND) {continue;}
-				if (checkFormulaResults(dividend, nextDivisor, 3*nextDivisor)) {return true;}
+				if (checkFormulaResults(dividend, nextDivisor, 3*nextDivisor, k, z)) {return true;}
 				if (lastDivisorIndex == DIVISOR_LIM - 1) {
 					//printf("Filled divisiors.\n");
 					return false;
@@ -117,7 +116,7 @@ bool tryBasic(uint64_t k) {
     __int128_t dividend = -1;
 	for (int64_t z = negBound; dividend <= 0 && !result; z++) {
 		dividend = (__int128_t)z * z * z - z - _6k;
-		if (checkFormulaDividend(dividend)) {result = true;}
+		if (checkFormulaDividend(dividend, k, z)) {result = true;}
 	}
 	return result;
 

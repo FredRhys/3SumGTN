@@ -16,7 +16,7 @@ void createResultsTxt() {
 int main(int argc, char** argv) {
     if (argc != 3) {return -1;}
     if (initfactor64("factor64/factor.bin") < 0) {
-		fprintf(stderr, "Cannot read factor data\n");
+		(void)fprintf(stderr, "Cannot read factor data\n");
 		return -1;
 	}
     const uint64_t RANGE = atoll(argv[1]);
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
         #pragma omp parallel for num_threads(THREADS)
         for (uint64_t i = 0; i <= RANGE; i++) {
             if (tryBasic(i)) {continue;}
-            fprintf(f, "Fail: %"PRIu64"\n", i);
+            (void)fprintf(f, "Fail: %"PRIu64"\n", i);
         }
     }
     fclose(f);
