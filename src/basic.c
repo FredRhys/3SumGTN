@@ -81,7 +81,7 @@ bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 		return false;
 	}
 	if (absDividend == 1) {
-		return checkFormulaResults(1, 1, 3);
+		return checkFormulaResults(1, 1, 3, k, z);
 	}
 	primeFactorCount = factor64(primeFactors, exponents, absDividend);
 	uint64_t divisors[DIVISOR_LIM], nextDivisor, base, prime;
