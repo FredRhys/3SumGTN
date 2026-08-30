@@ -13,6 +13,15 @@ void createResultsTxt() {
     fclose(f);
 }
 
+void mainloop(uint64_t range, uint64_t threads) {
+    #pragma omp parallel for num_threads(THREADS)
+    for (uint64_t i = 0; i <= RANGE; i++) {
+        if (tryBasic(i)) {continue;}
+        if (tryAdvanced(i)) {continue;}
+        (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
+    }
+}
+
 int main(int argc, char** argv) {
     if (argc != 3) {return -1;}
     if (initfactor64("factor64/factor.bin") < 0) {
@@ -23,14 +32,7 @@ int main(int argc, char** argv) {
     const uint16_t THREADS = atoi(argv[2]);
     (void)createResultsTxt();
     resultsDotTxt = fopen("results.txt", "a");
-    {
-        #pragma omp parallel for num_threads(THREADS)
-        for (uint64_t i = 0; i <= RANGE; i++) {
-            if (tryBasic(i)) {continue;}
-            if (tryAdvanced(i)) {continue;}
-            (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
-        }
-    }
+    (void)mainloop(RANGE, THREADS);
     fclose(resultsDotTxt);
     return 0;
 }
