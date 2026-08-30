@@ -76,3 +76,9 @@ uint64_t applyMasterPoly(uint64_t operand, ModEntry modEntry, uint64_t int_6k) {
 uint64_t applyMasterPolyDeriv(uint64_t operand, ModEntry modEntry) {
     return submod(montmul(3, montexp(operand, 2, modEntry), modEntry), 1, modEntry.modulus);
 }
+
+uint8_t degreeOfPoly(Poly operand) {
+    if (operand.deg2 != 0) {return 2;}
+    if (operand.deg1 != 0) {return 1;}
+    return 0;
+}
