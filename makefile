@@ -15,7 +15,7 @@ build:
 	mkdir build
 
 build/main.o: src/main.c
-	$(LD) $(CFLAGS) -fopenmp  -c src/main.c -o build/main.o
+	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
 build/basic.o: src/basic.c factor64/factor64.o
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
