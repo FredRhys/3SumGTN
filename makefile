@@ -26,7 +26,7 @@ factor64/factor64.o:
 build/advanced.o: src/advanced.c build/poly.o build/montmul.o
 	$(LD) $(CFLAGS) -c src/advanced.c -o build/advanced.o
 
-build/poly.o: src/poly.o build/montmul.o
+build/poly.o: src/poly.c build/montmul.o
 	$(LD) $(CFLAGS) -c src/poly.c -o build/poly.o
 
 build/montmul.o: libmontmul/montmul.c
