@@ -82,3 +82,34 @@ uint8_t degreeOfPoly(Poly operand) {
     if (operand.deg1 != 0) {return 1;}
     return 0;
 }
+
+uint8_t gcdPoly(Poly *result, Poly operand, ModEntry modEntry, uint64_t _6k) {
+	const uint64_t PRIME = modEntry.modulus;
+	operand = getMonicPoly(operand, modEntry);
+	uint8_t degree = degreeOfPoly(operand);
+	if (degree == 2) {
+			uint64_t deg1 = operand.deg1;
+			uint64_t deg0 = operand.deg0;
+			uint64_t denominator = submod(submod(montexp(deg1, 2, modEntry), deg0, PRIME), 1, PRIME);
+			uint64_t numerator = submod(montmul(deg1, deg0, modEntry), _6k, PRIME);
+			if (denominator == 0) {
+				if (numerator == 0) {
+					*result = operand;
+					return 2;
+				}
+				else {
+					return 0;
+				}
+			}
+			operand = makePoly(0, 1, montmul(numerator, invmod(denominator, modEntry), modEntry));
+	}
+	else if (degree == 0) {
+		return 0;
+	}
+	uint64_t deg0 = PRIME - operand.deg0;
+	if (applyMasterPoly(deg0, modEntry, _6k) == 0) {
+		*result = operand;
+		return 1;
+	}
+	return 0;
+}
