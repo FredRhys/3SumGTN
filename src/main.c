@@ -1,5 +1,6 @@
 // Includes
 #include "basic.h"
+#include "advanced.h"
 #include <omp.h>
 #include <stdlib.h> // for atoll
 // these are included in basic.h but I thought it best to include them here for completeness
@@ -14,8 +15,8 @@ void createResultsTxt() {
 }
 
 void mainloop(uint64_t range, uint64_t threads) {
-    #pragma omp parallel for num_threads(THREADS)
-    for (uint64_t i = 0; i <= RANGE; i++) {
+    #pragma omp parallel for num_threads(threads)
+    for (uint64_t i = 0; i <= range; i++) {
         if (tryBasic(i)) {continue;}
         if (tryAdvanced(i)) {continue;}
         (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
