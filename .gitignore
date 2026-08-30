@@ -428,6 +428,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-*.o
 build/*
 results.txt
