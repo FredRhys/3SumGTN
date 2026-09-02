@@ -10,12 +10,15 @@ void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue) {
     *(modEntryWrapper->residueHead) = makeResidueWrapper(residue, prev);
 }
 
-bool tryThisPrime(ModEntry primeEntry) {
-    const uint64_t PRIME = primeEntry.modulus;
+bool tryThisPrime(ModEntryWrapper* modEntryWrapper) {
+    const uint64_t MOD_ENTRY = modEntryWrapper->modEntry;
+    const uint64_t PRIME = MOD_ENTRY.modulus;
     switch (PRIME) {
         case 3:
-
+            appendResidue(modEntryWrapper, 2);
         case 2:
+            appendResidue(modEntryWrapper, 1);
+            appendResidue(modEntryWrapper, 0);
             return true;
         default:
             return extractRoots(primeEntry);
