@@ -1,16 +1,5 @@
 #include "advanced.h"
 
-void freePrimeWrappers(PrimeWrapper* head) {
-    PrimeWrapper* temp;
-    while (head != NULL) {
-        temp = head->prev;
-        (void)free(head->firstModEntryWrapper);
-        (void)free(head->lastModEntryWrapper);
-        (void)free(head);
-        head = temp;
-    }
-}
-
 bool tryThisPrime(uint64_t prime) {
     if (prime <= 3) {
         // add all residues
