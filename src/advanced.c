@@ -25,13 +25,13 @@ void freePrimeWrappers(PrimeWrapper* head) {
 }
 
 bool trySmallPowersOfThisPrime() {
-    return true;
+    return false;
 }
 
-bool trySmallPowersOfSmallPrimes(primesieve_iterator primeIterator,
+bool trySmallPowersOfSmallPrimes(primesieve_iterator* primeIterator,
     PrimeWrapper** primeWrapperHead) {
     uint64_t prime;
-    while ((prime = primesieve_next_prime(&primeIterator)) <= SQRT_DIVBOUND) {
+    while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {
         ModEntryWrapper* firstModEntryWrapper = NULL,* lastModEntryWrapper = NULL;
         if (trySmallPowersOfThisPrime()) {
             PrimeWrapper* primeWrapper = malloc(sizeof(PrimeWrapper));
@@ -58,7 +58,7 @@ bool tryAdvanced(uint64_t k) {
     (void)primesieve_init(&primeIterator);
     PrimeWrapper* primeWrapperHead = NULL;
     
-    if (trySmallPowersOfSmallPrimes(primeIterator, &primeWrapperHead)) {
+    if (trySmallPowersOfSmallPrimes(&primeIterator, &primeWrapperHead)) {
         return true;
     }
     if (tryLargePowersOfSmallPrimes()) {
