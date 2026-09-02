@@ -6,7 +6,7 @@ bool extractRoots(ModEntry primeEntry) {
 
 void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue) {
     ResidueWrapper* prev = modEntryWrapper->residueHead;
-    modEntryWrapper->residueHead = malloc(sizeof(residueWrapper));
+    modEntryWrapper->residueHead = malloc(sizeof(ResidueWrapper));
     *(modEntryWrapper->residueHead) = makeResidueWrapper(residue, prev);
 }
 
