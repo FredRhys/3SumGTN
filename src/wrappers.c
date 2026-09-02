@@ -13,12 +13,30 @@ PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first,
     return (PrimeWrapper){first, last, prev};
 }
 
+void freeResidueWrappers(ResidueWrapper* head) {
+    ResidueWrapper* temp;
+    while (head != NULL) {
+        temp = head->prev;
+        (void)free(head);
+        head = temp;
+    }
+}
+
+void freeModEntryWrappers(ModEntryWrapper* head) {
+    ModEntryWrapper* temp;
+    while (head != NULL) {
+        temp = head->prev;
+        (void)freeResidueWrappers(head->residueHead);
+        (void)free(head);
+        head = temp;
+    }
+}
+
 void freePrimeWrappers(PrimeWrapper* head) {
     PrimeWrapper* temp;
     while (head != NULL) {
         temp = head->prev;
-        (void)free(head->firstModEntryWrapper);
-        (void)free(head->lastModEntryWrapper);
+        (void)freeModEntryWrappers(head->lastModEntryWrapper);
         (void)free(head);
         head = temp;
     }
