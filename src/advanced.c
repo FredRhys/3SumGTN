@@ -11,7 +11,7 @@ void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue) {
 }
 
 bool tryThisPrime(ModEntryWrapper* modEntryWrapper) {
-    const uint64_t MOD_ENTRY = modEntryWrapper->modEntry;
+    const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
     const uint64_t PRIME = MOD_ENTRY.modulus;
     switch (PRIME) {
         case 3:
@@ -21,16 +21,17 @@ bool tryThisPrime(ModEntryWrapper* modEntryWrapper) {
             appendResidue(modEntryWrapper, 0);
             return true;
         default:
-            return extractRoots(primeEntry);
+            return extractRoots(MOD_ENTRY);
     }    
 }
 
 bool trySmallPowersOfThisPrime(uint64_t prime,
-    ModEntryWrapper** restrict firstModEntryWrapper,
-    ModEntryWrapper** restrict lastModEntryWrapper) {
+    ModEntryWrapper** restrict firstModEntryWrapperPtr,
+    ModEntryWrapper** restrict lastModEntryWrapperPtr) {
     ModEntry firstModEntry = primeModEntry(prime);
+    ModEntryWrapper firstModEntryWrapper = makeModEntryWrapper(firstModEntry, NULL);
 
-    if (!tryThisPrime(firstModEntry)) {return false;}
+    if (!tryThisPrime(&firstModEntryWrapper)) {return false;}
 
     ModEntry currentModEntry = firstModEntry;
     ModEntryWrapper currentModEntryWrapper = makeModEntryWrapper(currentModEntry, NULL);
@@ -38,10 +39,10 @@ bool trySmallPowersOfThisPrime(uint64_t prime,
     // while (currentMod <= SQRT_DIVBOUND) {
 
     // }
-    *firstModEntryWrapper = malloc(sizeof(ModEntryWrapper));
-    **firstModEntryWrapper = makeModEntryWrapper(firstModEntry, NULL);
-    *lastModEntryWrapper = malloc(sizeof(ModEntryWrapper));
-    **lastModEntryWrapper = currentModEntryWrapper;
+    *firstModEntryWrapperPtr = malloc(sizeof(ModEntryWrapper));
+    **firstModEntryWrapperPtr = firstModEntryWrapper;
+    *lastModEntryWrapperPtr = malloc(sizeof(ModEntryWrapper));
+    **lastModEntryWrapperPtr = currentModEntryWrapper;
     return true;
 }
 
