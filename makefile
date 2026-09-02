@@ -44,5 +44,4 @@ run.sh:
 	echo "build/main 1000000 12" > run.sh
 	chmod a+x run.sh
 
-
 default: build/main
