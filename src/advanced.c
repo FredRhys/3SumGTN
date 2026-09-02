@@ -4,6 +4,12 @@ bool extractRoots(ModEntry primeEntry) {
     return false;
 }
 
+void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue) {
+    ResidueWrapper* prev = modEntryWrapper->residueHead;
+    modEntryWrapper->residueHead = malloc(sizeof(residueWrapper));
+    *(modEntryWrapper->residueHead) = makeResidueWrapper(residue, prev);
+}
+
 bool tryThisPrime(ModEntry primeEntry) {
     const uint64_t PRIME = primeEntry.modulus;
     switch (PRIME) {
