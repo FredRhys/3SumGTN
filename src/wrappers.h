@@ -6,7 +6,7 @@
 
 typedef struct ResidueWrapper {
     uint64_t residue;
-    struct ResidueWrapper* next; // added in incidence order
+    struct ResidueWrapper* prev; // added in incidence order
 }ResidueWrapper;
 
 typedef struct ModEntryWrapper {
@@ -21,7 +21,7 @@ typedef struct PrimeWrapper {
     struct PrimeWrapper* prev; // the PrimeWrapper head should be that with the greatest modulus.
 }PrimeWrapper;
 
-ResidueWrapper makeResidueWrapper(uint64_t residue, ResidueWrapper* next);
+ResidueWrapper makeResidueWrapper(uint64_t residue, ResidueWrapper* prev);
 ModEntryWrapper makeModEntryWrapper(ModEntry modEntry, ModEntryWrapper* prev);
 PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first, ModEntryWrapper* restrict last, PrimeWrapper* prev);
 void freePrimeWrappers(PrimeWrapper* head);
