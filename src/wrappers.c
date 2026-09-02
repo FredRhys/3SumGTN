@@ -1,6 +1,6 @@
 #include "wrappers.h"
-ResidueWrapper makeResidueWrapper(uint64_t residue) {
-    return (ResidueWrapper){residue, NULL};
+ResidueWrapper makeResidueWrapper(uint64_t residue, ResidueWrapper* next) {
+    return (ResidueWrapper){residue, next};
 }
 
 ModEntryWrapper makeModEntryWrapper(ModEntry modEntry, ModEntryWrapper* prev) {
