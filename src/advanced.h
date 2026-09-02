@@ -4,6 +4,7 @@
 #include "poly.h"
 #include "../libmontmul/montmul.h" // this is included by poly.h
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 
