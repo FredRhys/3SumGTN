@@ -8,8 +8,7 @@ ModEntryWrapper makeModEntryWrapper(ModEntry modEntry, ModEntryWrapper* prev) {
     return (ModEntryWrapper){modEntry, NULL, prev};
 }
 
-PrimeWrapper makePrimeWrapper(uint64_t prime,
-    ModEntryWrapper* restrict first,
+PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first,
     ModEntryWrapper* restrict last,
     PrimeWrapper* prev) {
     return (PrimeWrapper){prime, first, last, prev};
@@ -35,8 +34,7 @@ bool trySmallPowersOfSmallPrimes(primesieve_iterator* primeIterator,
         ModEntryWrapper* firstModEntryWrapper = NULL,* lastModEntryWrapper = NULL;
         if (trySmallPowersOfThisPrime()) {
             PrimeWrapper* primeWrapper = malloc(sizeof(PrimeWrapper));
-            *primeWrapper = makePrimeWrapper(prime,
-                firstModEntryWrapper,
+            *primeWrapper = makePrimeWrapper(firstModEntryWrapper,
                 lastModEntryWrapper,
                 *primeWrapperHead);
             *primeWrapperHead = primeWrapper;

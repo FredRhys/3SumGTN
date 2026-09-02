@@ -24,7 +24,6 @@ typedef struct ModEntryWrapper {
 }ModEntryWrapper;
 
 typedef struct PrimeWrapper {
-    uint64_t prime;
     ModEntryWrapper* firstModEntry;
     ModEntryWrapper* lastModEntry;
     struct PrimeWrapper* prev; // the PrimeWrapper head should be that with the greatest modulus.
