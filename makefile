@@ -3,10 +3,10 @@ LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
 		 -O3\
-		 -pedantic
-# 		 -g\
-# 		 -fsanitize=address\
-# 		 -fsanitize=undefined\
+		 -pedantic\
+		 -g\
+		 -fsanitize=address\
+		 -fsanitize=undefined
 
 build/main: build build/main.o factor64/factor64.o build/basic.o build/advanced.o
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
