@@ -21,4 +21,7 @@ typedef struct PrimeWrapper {
     struct PrimeWrapper* prev; // the PrimeWrapper head should be that with the greatest modulus.
 }PrimeWrapper;
 
+PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first, ModEntryWrapper* restrict last, PrimeWrapper* prev);
+void freePrimeWrappers(PrimeWrapper* head);
+
 #endif
