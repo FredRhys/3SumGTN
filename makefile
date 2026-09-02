@@ -36,4 +36,13 @@ build/montmul.o: libmontmul/montmul.c
 clean:
 	rm -rf $(wildcard build/*)
 
+.PHONY: run
+run: run.sh
+	bash run.sh
+
+run.sh:
+	echo "build/main 1000000 12" > run.sh
+	chmod a+x run.sh
+
+
 default: build/main
