@@ -6,11 +6,14 @@ bool extractRoots(ModEntry primeEntry) {
 
 bool tryThisPrime(ModEntry primeEntry) {
     const uint64_t PRIME = primeEntry.modulus;
-    if (PRIME <= 3) {
-        // add all residues
-        return true;
-    }
-    return extractRoots(primeEntry);
+    switch (PRIME) {
+        case 3:
+
+        case 2:
+            return true;
+        default:
+            return extractRoots(primeEntry);
+    }    
 }
 
 bool trySmallPowersOfThisPrime(uint64_t prime,
