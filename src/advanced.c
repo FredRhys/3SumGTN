@@ -1,5 +1,4 @@
 #include "advanced.h"
-#include "wrappers.h"
 
 void freePrimeWrappers(PrimeWrapper* head) {
     PrimeWrapper* temp;

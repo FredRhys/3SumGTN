@@ -3,6 +3,7 @@
 #include <primesieve.h>
 #include "poly.h"
 #include "../libmontmul/montmul.h" // this is included by poly.h
+#include "wrappers.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
