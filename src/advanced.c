@@ -26,8 +26,11 @@ void freePrimeWrappers(PrimeWrapper* head) {
 }
 
 bool tryThisPrime(uint64_t prime) {
-    if (prime <= 3) {return true;}
-    return false;
+    if (prime <= 3) {
+        // add all residues
+        return true;
+    }
+    return extractRoots(prime);
 }
 
 bool trySmallPowersOfThisPrime(uint64_t prime,
