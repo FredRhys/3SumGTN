@@ -11,29 +11,49 @@ ModEntryWrapper makeModEntryWrapper(ModEntry modEntry, ModEntryWrapper* prev) {
 PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first,
     ModEntryWrapper* restrict last,
     PrimeWrapper* prev) {
-    return (PrimeWrapper){prime, first, last, prev};
+    return (PrimeWrapper){first, last, prev};
 }
 
 void freePrimeWrappers(PrimeWrapper* head) {
     PrimeWrapper* temp;
     while (head != NULL) {
         temp = head->prev;
-        free(head);
+        (void)free(head->firstModEntryWrapper);
+        (void)free(head->lastModEntryWrapper);
+        (void)free(head);
         head = temp;
     }
 }
 
-bool trySmallPowersOfThisPrime() {
+bool tryThisPrime(uint64_t prime) {
+    if (prime <= 3) {return true;}
     return false;
+}
+
+bool trySmallPowersOfThisPrime(uint64_t prime,
+    ModEntryWrapper** restrict firstModEntryWrapper,
+    ModEntryWrapper** restrict lastModEntryWrapper) {
+    ModEntry firstModEntry = primeModEntry(prime);
+    //ModEntry currentModEntry = firstModEntry;
+
+    if (!tryThisPrime(prime)) {return false;}
+
+    // while (currentMod <= SQRT_DIVBOUND) {
+
+    // }
+    *firstModEntryWrapper = malloc(sizeof(ModEntryWrapper));
+    *lastModEntryWrapper = malloc(sizeof(ModEntryWrapper));
+    return true;
 }
 
 bool trySmallPowersOfSmallPrimes(primesieve_iterator* primeIterator,
     PrimeWrapper** primeWrapperHead) {
+    ModEntryWrapper* firstModEntryWrapper = NULL,* lastModEntryWrapper = NULL;
+    PrimeWrapper* primeWrapper = NULL;
     uint64_t prime;
-    while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {
-        ModEntryWrapper* firstModEntryWrapper = NULL,* lastModEntryWrapper = NULL;
-        if (trySmallPowersOfThisPrime()) {
-            PrimeWrapper* primeWrapper = malloc(sizeof(PrimeWrapper));
+    while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {      
+        if (trySmallPowersOfThisPrime(prime, &firstModEntryWrapper, &lastModEntryWrapper)) {
+            primeWrapper = malloc(sizeof(PrimeWrapper));
             *primeWrapper = makePrimeWrapper(firstModEntryWrapper,
                 lastModEntryWrapper,
                 *primeWrapperHead);
