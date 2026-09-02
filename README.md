@@ -19,6 +19,7 @@ Credit to AR Booker for the original [```factor64```](https://github.com/arbooke
 This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile.
 
 Running ```build/main RANGE THREADS``` will perform the search from 1 to ```RANGE``` using ```THREADS``` threads. For clarity, I used ```build/main 1000000 12``` for testing.
+Alternatively, I added the ```make run``` rule, which creates and then runs a default ```run.sh``` file. Creating your own in the above format will run the command on your values every time you run ```make run```.
 
 [CodeCogs](https://editor.codecogs.com/) was used for Latex rendering in ```README.md```.
 
