@@ -1,5 +1,9 @@
 #include "advanced.h"
 
+bool extractRoots(uint64_t prime) {
+    return false;
+}
+
 bool tryThisPrime(uint64_t prime) {
     if (prime <= 3) {
         // add all residues
