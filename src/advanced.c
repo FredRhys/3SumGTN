@@ -1,30 +1,35 @@
 #include "advanced.h"
 
-bool extractRoots(uint64_t prime) {
+bool extractRoots(ModEntry primeEntry) {
     return false;
 }
 
-bool tryThisPrime(uint64_t prime) {
-    if (prime <= 3) {
+bool tryThisPrime(ModEntry primeEntry) {
+    const uint64_t PRIME = primeEntry.modulus;
+    if (PRIME <= 3) {
         // add all residues
         return true;
     }
-    return extractRoots(prime);
+    return extractRoots(primeEntry);
 }
 
 bool trySmallPowersOfThisPrime(uint64_t prime,
     ModEntryWrapper** restrict firstModEntryWrapper,
     ModEntryWrapper** restrict lastModEntryWrapper) {
-    //ModEntry firstModEntry = primeModEntry(prime);
-    //ModEntry currentModEntry = firstModEntry;
+    ModEntry firstModEntry = primeModEntry(prime);
 
-    if (!tryThisPrime(prime)) {return false;}
+    if (!tryThisPrime(firstModEntry)) {return false;}
+
+    ModEntry currentModEntry = firstModEntry;
+    ModEntryWrapper currentModEntryWrapper = makeModEntryWrapper(currentModEntry, NULL);
 
     // while (currentMod <= SQRT_DIVBOUND) {
 
     // }
     *firstModEntryWrapper = malloc(sizeof(ModEntryWrapper));
+    **firstModEntryWrapper = makeModEntryWrapper(firstModEntry, NULL);
     *lastModEntryWrapper = malloc(sizeof(ModEntryWrapper));
+    **lastModEntryWrapper = currentModEntryWrapper;
     return true;
 }
 
