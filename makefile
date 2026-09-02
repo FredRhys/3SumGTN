@@ -8,9 +8,9 @@ CFLAGS = -std=c23\
 		 -fsanitize=address\
 		 -fsanitize=undefined
 
-mainfiles := build build/main.o build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o
+buildfiles := build build/main.o build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o
 
-build/main: $(mainfiles)
+build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
 
 build:

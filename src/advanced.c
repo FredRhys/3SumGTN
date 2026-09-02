@@ -15,7 +15,7 @@ bool tryThisPrime(uint64_t prime) {
 bool trySmallPowersOfThisPrime(uint64_t prime,
     ModEntryWrapper** restrict firstModEntryWrapper,
     ModEntryWrapper** restrict lastModEntryWrapper) {
-    ModEntry firstModEntry = primeModEntry(prime);
+    //ModEntry firstModEntry = primeModEntry(prime);
     //ModEntry currentModEntry = firstModEntry;
 
     if (!tryThisPrime(prime)) {return false;}
