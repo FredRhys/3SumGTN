@@ -1,4 +1,5 @@
 #include "wrappers.h"
+
 ResidueWrapper makeResidueWrapper(uint64_t residue, ResidueWrapper* prev) {
     return (ResidueWrapper){residue, prev};
 }
@@ -36,6 +37,7 @@ void freePrimeWrappers(PrimeWrapper* head) {
     PrimeWrapper* temp;
     while (head != NULL) {
         temp = head->prev;
+        (void)free(head->firstModEntryWrapper);
         (void)freeModEntryWrappers(head->lastModEntryWrapper);
         (void)free(head);
         head = temp;

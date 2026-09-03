@@ -25,40 +25,31 @@ bool tryThisPrime(ModEntryWrapper* modEntryWrapper) {
     }    
 }
 
-bool trySmallPowersOfThisPrime(uint64_t prime,
-    ModEntryWrapper** restrict firstModEntryWrapperPtr,
-    ModEntryWrapper** restrict lastModEntryWrapperPtr) {
-    ModEntry firstModEntry = primeModEntry(prime);
-    ModEntryWrapper firstModEntryWrapper = makeModEntryWrapper(firstModEntry, NULL);
+bool trySmallPowersOfThisPrime(uint64_t prime, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
+    ModEntry primeEntry = primeModEntry(prime);
+    ModEntryWrapper first = makeModEntryWrapper(primeEntry, NULL);
+    if (!tryThisPrime(&first)) {return false;}
 
-    if (!tryThisPrime(&firstModEntryWrapper)) {return false;}
+    // exponent loop
 
-    ModEntry currentModEntry = firstModEntry;
-    ModEntryWrapper currentModEntryWrapper = makeModEntryWrapper(currentModEntry, NULL);
-
-    // while (currentMod <= SQRT_DIVBOUND) {
-
-    // }
-    *firstModEntryWrapperPtr = malloc(sizeof(ModEntryWrapper));
-    **firstModEntryWrapperPtr = firstModEntryWrapper;
-    *lastModEntryWrapperPtr = malloc(sizeof(ModEntryWrapper));
-    **lastModEntryWrapperPtr = currentModEntryWrapper;
+    *firstPtr = malloc(sizeof(ModEntryWrapper));
+    **firstPtr = first;
+    *lastPtr = malloc(sizeof(ModEntryWrapper));
+    **lastPtr = first;
     return true;
 }
 
 bool trySmallPowersOfSmallPrimes(primesieve_iterator* primeIterator,
     PrimeWrapper** primeWrapperHead) {
-    ModEntryWrapper* firstModEntryWrapper = NULL,* lastModEntryWrapper = NULL;
-    PrimeWrapper* primeWrapper = NULL;
+    PrimeWrapper* temp;
+    ModEntryWrapper* firstModEntryWrapper;
+    ModEntryWrapper* lastModEntryWrapper;
     uint64_t prime;
-    while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {      
-        if (trySmallPowersOfThisPrime(prime, &firstModEntryWrapper, &lastModEntryWrapper)) {
-            primeWrapper = malloc(sizeof(PrimeWrapper));
-            *primeWrapper = makePrimeWrapper(firstModEntryWrapper,
-                lastModEntryWrapper,
-                *primeWrapperHead);
-            *primeWrapperHead = primeWrapper;
-        }
+    while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {
+        if (!trySmallPowersOfThisPrime(prime, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
+        temp = *primeWrapperHead;
+        *primeWrapperHead = malloc(sizeof(PrimeWrapper));
+        **primeWrapperHead = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
     }
     return false;
 }
