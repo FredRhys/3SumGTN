@@ -9,7 +9,7 @@ bool extractRootsFromQuad(Poly poly, ModEntryWrapper* modEntryWrapper) {
     if (legendre(DISCRIMINANT, MOD_ENTRY) == -1) {return false;}
     const uint64_t SQRT = sqrtmod(DISCRIMINANT, MOD_ENTRY);
     const uint64_t NUMERATOR1 = submod(SQRT, B, PRIME);
-    const uint64_t NUMERATOR2 = submod(PRIME - SQRT, B, PRIME);
+    const uint64_t NUMERATOR2 = submod(0, B + SQRT, PRIME);
     const uint64_t ROOT1 = montmul(NUMERATOR1, DENOMINATOR, MOD_ENTRY);
     appendResidue(modEntryWrapper, ROOT1);
     if (NUMERATOR1 == NUMERATOR2) {return true;}
