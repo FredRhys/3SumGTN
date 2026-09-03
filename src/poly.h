@@ -16,8 +16,9 @@ Poly mulPoly(Poly multiplier, Poly multiplicand, ModEntry modEntry, uint64_t int
 Poly mulPolyConst(Poly multiplier, uint64_t multiplicand, ModEntry modEntry);
 Poly getMonicPoly(Poly operand, ModEntry modEntry);
 Poly getRootPoly(ModEntry modEntry, uint64_t int_6k, uint64_t offset);
+Poly gcdPoly(Poly operand, ModEntry modEntry, uint64_t _6k);
 uint64_t applyMasterPoly(uint64_t operand, ModEntry modEntry, uint64_t int_6k);
 uint64_t applyMasterPolyDeriv(uint64_t operand, ModEntry modEntry);
-//uint8_t degreeOfPoly(Poly operand);
+uint8_t degreeOfPoly(Poly operand);
 
 #endif
