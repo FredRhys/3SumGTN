@@ -34,17 +34,17 @@ bool extractRoots(Poly poly, ModEntryWrapper* modEntryWrapper) {
 
 }
 
-bool extractRootsRunner(ModEntryWrapper* modEntryWrapper, uint64_t _6k) {
+bool extractRootsRunner(ModEntryWrapper* modEntryWrapper, uint64_t k) {
     Poly rootPoly;
     const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
     const uint64_t PRIME = MOD_ENTRY.modulus;
+    const uint64_t _6k = montmul(6, k, MOD_ENTRY);
     for (uint64_t offset = 0; offset < PRIME; offset++) {
         rootPoly = getRootPoly(MOD_ENTRY, _6k, offset);
         if (degreeOfPoly(rootPoly) == 0) {continue;}
         const Poly GCD1 = gcdPoly(rootPoly, MOD_ENTRY, _6k);
         rootPoly.deg0 = submod(rootPoly.deg0, 2, PRIME);
         const Poly GCD2 = gcdPoly(rootPoly, MOD_ENTRY, _6k);
-        fprintf(stdout, "%"PRIu64": %d\n", PRIME, degreeOfPoly(GCD1) + degreeOfPoly(GCD2));
         switch (degreeOfPoly(GCD1) + degreeOfPoly(GCD2)) {
             case 2:
                 appendResidue(modEntryWrapper, offset);
@@ -62,7 +62,7 @@ bool extractRootsRunner(ModEntryWrapper* modEntryWrapper, uint64_t _6k) {
     return false;
 }
 
-bool tryThisPrime(ModEntryWrapper* modEntryWrapper, uint64_t _6k) {
+bool tryThisPrime(ModEntryWrapper* modEntryWrapper, uint64_t k) {
     const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
     const uint64_t PRIME = MOD_ENTRY.modulus;
     switch (PRIME) {
@@ -73,14 +73,14 @@ bool tryThisPrime(ModEntryWrapper* modEntryWrapper, uint64_t _6k) {
             appendResidue(modEntryWrapper, 0);
             return true;
         default:
-            return extractRootsRunner(modEntryWrapper, _6k);
+            return extractRootsRunner(modEntryWrapper, k);
     }    
 }
 
-bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t _6k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
+bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
     ModEntry primeEntry = primeModEntry(prime);
     ModEntryWrapper first = makeModEntryWrapper(primeEntry, NULL);
-    if (!tryThisPrime(&first, _6k)) {return false;}
+    if (!tryThisPrime(&first, k)) {return false;}
 
     // exponent loop
 
@@ -91,13 +91,13 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t _6k, ModEntryWrapper** r
     return true;
 }
 
-bool trySmallPowersOfSmallPrimes(uint64_t _6k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapperHead) {
+bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapperHead) {
     PrimeWrapper* temp;
     ModEntryWrapper* firstModEntryWrapper;
     ModEntryWrapper* lastModEntryWrapper;
     uint64_t prime;
     while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {
-        if (!trySmallPowersOfThisPrime(prime, _6k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
+        if (!trySmallPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
         temp = *primeWrapperHead;
         *primeWrapperHead = malloc(sizeof(PrimeWrapper));
         **primeWrapperHead = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
@@ -117,9 +117,8 @@ bool tryAdvanced(uint64_t k) {
     primesieve_iterator primeIterator;
     (void)primesieve_init(&primeIterator);
     PrimeWrapper* primeWrapperHead = NULL;
-    const uint64_t _6k = 6 * k;
     
-    if (trySmallPowersOfSmallPrimes(_6k, &primeIterator, &primeWrapperHead)) {
+    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
         return true;
     }
     if (tryLargePowersOfSmallPrimes()) {

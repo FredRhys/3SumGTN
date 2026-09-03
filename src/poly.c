@@ -52,9 +52,9 @@ Poly getMonicPoly(Poly operand, ModEntry modEntry) {
 }
 
 Poly getRootPoly(ModEntry modEntry, uint64_t int_6k, uint64_t offset) {
-    const uint64_t prime = modEntry.modulus;
-    uint64_t exponent = (prime-1)/2;
-    Poly base = makePoly(0, 1, (offset == 0) ? 0 : prime - offset);
+    const uint64_t PRIME = modEntry.modulus;
+    uint64_t exponent = (PRIME-1)/2;
+    Poly base = makePoly(0, 1, submod(0, offset, PRIME));
     Poly result = makePoly(0, 0, 1);
 
     while (exponent > 0) {
@@ -64,7 +64,7 @@ Poly getRootPoly(ModEntry modEntry, uint64_t int_6k, uint64_t offset) {
         base = mulPoly(base, base, modEntry, int_6k);
         exponent >>= 1;
     }
-    result.deg0 = addmod(result.deg0, 1, prime);
+    result.deg0 = addmod(result.deg0, 1, PRIME);
     return result;
 }
 
