@@ -34,6 +34,21 @@ bool extractRoots(Poly poly, ModEntryWrapper* modEntryWrapper) {
 
 }
 
+void checkOffsetIsRoot(ModEntryWrapper* modEntryWrapper, uint64_t _6k, uint64_t offset, uint8_t degreeSum) {
+    const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
+    switch (degreeSum) {
+        case 2:
+            appendResidue(modEntryWrapper, offset);
+            break;
+        case 0:
+            if (applyMasterPoly(offset, MOD_ENTRY, _6k) != 0) {break;}
+            appendResidue(modEntryWrapper, offset);
+            break;
+        default:
+            break;
+    }
+}
+
 bool extractRootsRunner(ModEntryWrapper* modEntryWrapper, uint64_t k) {
     Poly rootPoly;
     const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
@@ -45,17 +60,7 @@ bool extractRootsRunner(ModEntryWrapper* modEntryWrapper, uint64_t k) {
         const Poly GCD1 = gcdPoly(rootPoly, MOD_ENTRY, _6k);
         rootPoly.deg0 = submod(rootPoly.deg0, 2, PRIME);
         const Poly GCD2 = gcdPoly(rootPoly, MOD_ENTRY, _6k);
-        switch (degreeOfPoly(GCD1) + degreeOfPoly(GCD2)) {
-            case 2:
-                appendResidue(modEntryWrapper, offset);
-                break;
-            case 0:
-                if (applyMasterPoly(offset, MOD_ENTRY, _6k) != 0) {break;}
-                appendResidue(modEntryWrapper, offset);
-                break;
-            default:
-                break;
-        }
+        (void)checkOffsetIsRoot(modEntryWrapper, _6k, offset, degreeOfPoly(GCD1) + degreeOfPoly(GCD2));
         const bool RESULT1 = extractRoots(GCD1, modEntryWrapper);
         return extractRoots(GCD2, modEntryWrapper) || RESULT1;
     }
