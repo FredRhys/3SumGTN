@@ -73,6 +73,7 @@ bool tryThisPrime(ModEntryWrapper* modEntryWrapper, uint64_t k) {
     switch (PRIME) {
         case 3:
             appendResidue(modEntryWrapper, 2);
+            // Employing intentional case fallthrough
         case 2:
             appendResidue(modEntryWrapper, 1);
             appendResidue(modEntryWrapper, 0);
