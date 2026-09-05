@@ -145,27 +145,36 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     return true;
 }
 
-bool checkSolution(uint64_t residue, uint64_t modulus) {
+bool checkSolution(uint64_t residue, uint64_t modulus, uint64_t _6k, uint64_t k) {
+    __int128_t dividand;
     for (int64_t z = -DIVBOUND; z < DIVBOUND; z += modulus) {
-        break;
+        dividand = (__int128_t)z * z * z - z - _6k;
+        if (checkFormulaResults(dividand, modulus, 3 * modulus, k, z)) {
+            return true;
+        }
     }
     return false;
 }
 
-bool checkAllSolutions(PrimeWrapper* primeWrapper) {
+bool checkAllSolutions(PrimeWrapper* primeWrapper, uint64_t k) {
     ModEntryWrapper* modEntryWrapper;
     ModEntry modEntry;
     ResidueWrapper* residueWrapper;
     uint64_t modulus;
     uint64_t residue;
+    uint64_t _6k;
     while (primeWrapper != NULL) {
         modEntryWrapper = primeWrapper->lastModEntryWrapper;
         while (modEntryWrapper != NULL) {
             modEntry = modEntryWrapper->modEntry;
+            _6k = montmul(6, k, modEntry);
             modulus = modEntry.modulus;
             residueWrapper = modEntryWrapper->residueHead;
             while (residueWrapper != NULL) {
                 residue = residueWrapper->residue;
+                if (checkSolution(residue, modulus, _6k, k)) {
+                    return true;
+                }
                 residueWrapper = residueWrapper->prev;
             }
             modEntryWrapper = modEntryWrapper->prev;
@@ -187,7 +196,7 @@ bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator,
         *primeWrapperHead = malloc(sizeof(PrimeWrapper));
         **primeWrapperHead = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
     }
-    return checkAllSolutions(*primeWrapperHead);
+    return checkAllSolutions(*primeWrapperHead, k);
 }
 
 bool tryLargePowersOfSmallPrimes() {
@@ -202,18 +211,19 @@ bool tryAdvanced(uint64_t k) {
     primesieve_iterator primeIterator;
     (void)primesieve_init(&primeIterator);
     PrimeWrapper* primeWrapperHead = NULL;
+    bool result = false;
     
     if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
-        return true;
+        result = true;
     }
-    if (tryLargePowersOfSmallPrimes()) {
-        return true;
+    else if (tryLargePowersOfSmallPrimes()) {
+        result = true;
     }
-    if (tryLargePrimes()) {
-        return true;
+    else if (tryLargePrimes()) {
+        result = true;
     }
 
     (void)freePrimeWrappers(primeWrapperHead);
     (void)primesieve_free_iterator(&primeIterator);
-    return false;
+    return result;
 }
