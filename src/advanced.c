@@ -102,14 +102,15 @@ void extractRootsWithBruteForce(ModEntryWrapper* modEntryWrapper, uint64_t _6k) 
     }
 }
 
-void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* residueHead, ModEntry primeEntry, uint64_t _6k) {
+void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* residueHead, ModEntry primeEntry, uint64_t k) {
     const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
+    const uint64_t _6k = montmul(6, k, MOD_ENTRY);
     uint64_t residue;
     while (residueHead != NULL) {
         residue = residueHead->residue;
         const uint64_t DENOMINATOR = applyMasterPolyDeriv(residue, MOD_ENTRY);
         //TODO figure out why this doesn't accept modulus of 4.
-        if (DENOMINATOR != 0 && MOD_ENTRY.modulus > 4) {
+        if (DENOMINATOR != 0 && MOD_ENTRY.modulus != 4) {
             (void)extractRootsWithHensels(modEntryWrapper, primeEntry, residue, DENOMINATOR, _6k);
         }
         else {
@@ -134,7 +135,7 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     ModEntry modEntry = increasePrimeModEntryPower(primeEntry, primeEntry);
     while (modulus <= SQRT_DIVBOUND) {
         last = makeModEntryWrapper(modEntry, *lastPtr);
-        (void)extractRootsFromPower(&last, residueHead, primeEntry, (6*k)%modulus);
+        (void)extractRootsFromPower(&last, residueHead, primeEntry, k);
         *lastPtr = malloc(sizeof(ModEntryWrapper));
         **lastPtr = last;
         modulus *= prime;
