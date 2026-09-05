@@ -145,10 +145,10 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     return true;
 }
 
-bool checkSolution(uint64_t residue, uint64_t modulus, uint64_t _6k, uint64_t k) {
+bool checkSolution(uint64_t residue, uint64_t modulus, uint64_t k) {
     __int128_t dividand;
     for (int64_t z = -DIVBOUND; z < DIVBOUND; z += modulus) {
-        dividand = (__int128_t)z * z * z - z - _6k;
+        dividand = (__int128_t)z * z * z - z - 6 * k;
         if (checkFormulaResults(dividand, modulus, 3 * modulus, k, z)) {
             return true;
         }
@@ -162,17 +162,15 @@ bool checkAllSolutions(PrimeWrapper* primeWrapper, uint64_t k) {
     ResidueWrapper* residueWrapper;
     uint64_t modulus;
     uint64_t residue;
-    uint64_t _6k;
     while (primeWrapper != NULL) {
         modEntryWrapper = primeWrapper->lastModEntryWrapper;
         while (modEntryWrapper != NULL) {
             modEntry = modEntryWrapper->modEntry;
-            _6k = montmul(6, k, modEntry);
             modulus = modEntry.modulus;
             residueWrapper = modEntryWrapper->residueHead;
             while (residueWrapper != NULL) {
                 residue = residueWrapper->residue;
-                if (checkSolution(residue, modulus, _6k, k)) {
+                if (checkSolution(residue, modulus, k)) {
                     return true;
                 }
                 residueWrapper = residueWrapper->prev;
