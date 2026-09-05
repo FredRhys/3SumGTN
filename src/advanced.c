@@ -175,7 +175,7 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
             residueWrapper = modEntryWrapper->residueHead;
             while (residueWrapper != NULL) {
                 residue = residueWrapper->residue;
-                if (checkResidue(residue, modulus, k)) {
+                if (checkResidueRunner(residue, modulus, k)) {
                     return true;
                 }
                 residueWrapper = residueWrapper->prev;
