@@ -145,6 +145,37 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     return true;
 }
 
+bool checkSolution(uint64_t residue, uint64_t modulus) {
+    for (int64_t z = -DIVBOUND; z < DIVBOUND; z += modulus) {
+        break;
+    }
+    return false;
+}
+
+bool checkAllSolutions(PrimeWrapper* primeWrapper) {
+    ModEntryWrapper* modEntryWrapper;
+    ModEntry modEntry;
+    ResidueWrapper* residueWrapper;
+    uint64_t modulus;
+    uint64_t residue;
+    while (primeWrapper != NULL) {
+        modEntryWrapper = primeWrapper->lastModEntryWrapper;
+        while (modEntryWrapper != NULL) {
+            modEntry = modEntryWrapper->modEntry;
+            modulus = modEntry.modulus;
+            residueWrapper = modEntryWrapper->residueHead;
+            while (residueWrapper != NULL) {
+                residue = residueWrapper->residue;
+                residueWrapper = residueWrapper->prev;
+            }
+            modEntryWrapper = modEntryWrapper->prev;
+        }
+        
+        primeWrapper = primeWrapper->prev;
+    }
+    return false;
+}
+
 bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapperHead) {
     PrimeWrapper* temp;
     ModEntryWrapper* firstModEntryWrapper;
@@ -156,7 +187,7 @@ bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator,
         *primeWrapperHead = malloc(sizeof(PrimeWrapper));
         **primeWrapperHead = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
     }
-    return false;
+    return checkAllSolutions(*primeWrapperHead);
 }
 
 bool tryLargePowersOfSmallPrimes() {

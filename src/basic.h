@@ -4,14 +4,10 @@
 #define DIVISOR_LIM 1000
 
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdbit.h>
-#include <math.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
-
-// global variables
-extern FILE* resultsDotTxt;
+#include "formula.h"
 
 // functions from factor64
 int initfactor64(const char*);

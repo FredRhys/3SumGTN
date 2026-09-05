@@ -8,7 +8,7 @@ CFLAGS = -std=c23\
 		 -fsanitize=address\
 		 -fsanitize=undefined
 
-buildfiles := build build/main.o build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o
+buildfiles := build build/main.o build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
 
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
@@ -19,13 +19,13 @@ build:
 build/main.o: src/main.c
 	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
-build/basic.o: src/basic.c factor64/factor64.o
+build/basic.o: src/basic.c factor64/factor64.o build/formula.o
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
 
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
 
-build/advanced.o: src/advanced.c build/poly.o build/montmul.o build/wrappers.o
+build/advanced.o: src/advanced.c build/poly.o build/montmul.o build/wrappers.o build/formula.o
 	$(LD) $(CFLAGS) -c src/advanced.c -o build/advanced.o
 
 build/poly.o: src/poly.c build/montmul.o
@@ -36,6 +36,9 @@ build/wrappers.o: src/wrappers.c build/montmul.o
 
 build/montmul.o: libmontmul/montmul.c
 	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/montmul.o
+
+build/formula.o: src/formula.c
+	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
 
 .PHONY: clean
 clean:
