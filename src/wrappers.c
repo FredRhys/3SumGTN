@@ -25,7 +25,7 @@ void freeResidueWrappers(ResidueWrapper* head) {
     ResidueWrapper* temp;
     while (head != NULL) {
         temp = head->prev;
-        fprintf(stdout, "%"PRIu64", ", head->residue);
+        //fprintf(stdout, "%"PRIu64", ", head->residue);
         (void)free(head);
         head = temp;
     }
@@ -35,10 +35,10 @@ void freeModEntryWrappers(ModEntryWrapper* head) {
     ModEntryWrapper* temp;
     while (head != NULL) {
         temp = head->prev;
-        fprintf(stdout, "%"PRIu64": ", head->modEntry.modulus);
+        //fprintf(stdout, "%"PRIu64": ", head->modEntry.modulus);
         (void)freeResidueWrappers(head->residueHead);
         (void)free(head);
-        putchar('\n');
+        //putchar('\n');
         head = temp;
     }
 }

@@ -13,13 +13,13 @@ buildfiles := build build/main.o build/basic.o factor64/factor64.o build/advance
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
 
-build:
+build: 
 	mkdir build
 
-build/main.o: src/main.c
+build/main.o: src/main.c build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
 	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
-build/basic.o: src/basic.c factor64/factor64.o build/formula.o
+build/basic.o: src/basic.c factor64/factor64.o
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
 
 factor64/factor64.o:
