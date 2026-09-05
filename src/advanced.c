@@ -145,24 +145,20 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     return true;
 }
 
-bool checkSolution(uint64_t modulus, uint64_t k, uint64_t z) {
-    if (z > UINT42_MAX) {return false;}
-    __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
-    if (checkFormulaResults(dividand, modulus, 3 * modulus, k, z)) {
-        return true;
+bool checkResidue(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SIGN) {
+    const int64_t INCREMENT = SIGN * modulus;
+    for (int64_t z = residue; (SIGN) * z < DIVBOUND; z += INCREMENT) {
+        if ((SIGN) * z > UINT42_MAX) {break;}
+        __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
+        if (checkFormulaResults(dividand, modulus, 3 * modulus, k, z)) {
+            return true;
+        }
     }
     return false;
 }
 
-
-bool checkResidue(uint64_t residue, uint64_t modulus, uint64_t k) {
-    for (int64_t z = residue; z < DIVBOUND && z <= UINT42_MAX; z += modulus) {
-        if (checkSolution(modulus, k, z)) {return true;}
-    }
-    for (int64_t z = residue; z > -DIVBOUND && z > -UINT42_MAX; z -= modulus) {
-        if (checkSolution(modulus, k, z)) {return true;}
-    }
-    return false;
+bool checkResidueRunner(uint64_t residue, uint64_t modulus, uint64_t k) {
+    return checkResidue(modulus, k, residue, 1) || checkResidue(modulus, k, residue, -1);
 }
 
 bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
