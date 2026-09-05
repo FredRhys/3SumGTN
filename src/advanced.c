@@ -133,7 +133,7 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     ModEntryWrapper last;
     uint64_t modulus = prime * prime;
     ModEntry modEntry = increasePrimeModEntryPower(primeEntry, primeEntry);
-    while (modulus <= SQRT_DIVBOUND) {
+    while (modulus < SQRT_DIVBOUND) {
         last = makeModEntryWrapper(modEntry, *lastPtr);
         (void)extractRootsFromPower(&last, residueHead, primeEntry, k);
         *lastPtr = malloc(sizeof(ModEntryWrapper));
@@ -188,21 +188,91 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
     return false;
 }
 
-bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapperHead) {
+bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper) {
     PrimeWrapper* temp;
     ModEntryWrapper* firstModEntryWrapper;
     ModEntryWrapper* lastModEntryWrapper;
     uint64_t prime;
-    while ((prime = primesieve_next_prime(primeIterator)) <= SQRT_DIVBOUND) {
+    while ((prime = primesieve_next_prime(primeIterator)) < SQRT_DIVBOUND) {
         if (!trySmallPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
-        temp = *primeWrapperHead;
-        *primeWrapperHead = malloc(sizeof(PrimeWrapper));
-        **primeWrapperHead = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
+        temp = *primeWrapper;
+        *primeWrapper = malloc(sizeof(PrimeWrapper));
+        **primeWrapper = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
     }
-    return checkAllResidues(*primeWrapperHead, k);
+    return checkAllResidues(*primeWrapper, k);
 }
 
-bool tryLargePowersOfSmallPrimes() {
+//TODO add to libmontmul.
+uint64_t crtCalc(uint64_t residue1, ModEntry entry1, uint64_t residue2, ModEntry entry2, ModEntry newEntry) {
+	const uint64_t MOD1 = entry1.modulus, MOD2 = entry2.modulus;
+    const uint64_t INV1 = invmod(MOD1, entry2);
+    const uint64_t INV2 = invmod(MOD2, entry1);
+    return addmod(
+        montmul(residue1, montmul(MOD2, INV2, newEntry), newEntry),
+        montmul(residue2, montmul(MOD1, INV1, newEntry), newEntry), newEntry.modulus);
+}
+
+bool tryWithAllResidues(PrimeWrapper* primeWrapper, ModEntryWrapper modEntryWrapper2, uint64_t k) {
+    ModEntryWrapper* modEntryWrapper1;
+    ModEntry entry1, entry2 = modEntryWrapper2.modEntry, newEntry;
+    ResidueWrapper* residueWrapper1,* residueWrapper2 = modEntryWrapper2.residueHead;
+    uint64_t residue1, residue2, newResidue;
+    while (residueWrapper2 != NULL) {
+        residue2 = residueWrapper2->residue;
+        if (checkResidueRunner(residue2, entry2.modulus, k)) {
+            return true;
+        }
+        while (primeWrapper != NULL) {
+            modEntryWrapper1 = primeWrapper->lastModEntryWrapper;
+            while (modEntryWrapper1 != NULL) {
+                entry1 = modEntryWrapper1->modEntry;
+                newEntry = combineCoprimeModEntries(entry1, entry2);
+                residueWrapper1 = modEntryWrapper1->residueHead;
+                while (residueWrapper1 != NULL) {
+                    residue1 = residueWrapper1->residue;
+                    newResidue = crtCalc(residue1, entry1, residue2, entry2, newEntry);
+                    if (checkResidueRunner(newResidue, newEntry.modulus, k)) {
+                        return true;
+                    }
+                    residueWrapper2 = residueWrapper2->prev;
+                    residueWrapper1 = residueWrapper1->prev;
+                }
+            modEntryWrapper1 = modEntryWrapper1->prev;
+            }        
+            primeWrapper = primeWrapper->prev;
+        }
+    }
+    return false;
+}
+
+// this doesn't work.
+bool tryLargePowersOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t k) {
+    //fprintf(stdout, "Here.\n");
+    ModEntryWrapper* modEntryWrapper,* primeEntryWrapper;
+    ResidueWrapper* residueWrapper;
+    ModEntry modEntry, primeEntry;
+    uint64_t modulus, prime;
+    bool result;
+    while (primeWrapper != NULL) {
+        primeEntryWrapper = primeWrapper->firstModEntryWrapper;
+        primeEntry = primeEntryWrapper->modEntry;
+        prime = primeEntry.modulus;
+        modEntryWrapper = primeWrapper->lastModEntryWrapper;
+        modEntry = modEntryWrapper->modEntry;
+        modulus = modEntry.modulus * prime;
+        residueWrapper = modEntryWrapper->residueHead;
+        while (modulus < SQRT_DIVBOUND) {
+            modEntry = increasePrimeModEntryPower(modEntry, primeEntry);
+            *modEntryWrapper = makeModEntryWrapper(modEntry, NULL);
+            (void)extractRootsFromPower(modEntryWrapper, residueWrapper, primeEntry, k);
+            if (tryWithAllResidues(primeWrapper->prev, *modEntryWrapper, k)) {result = true;}
+            freeResidueWrappers(residueWrapper);
+            if (result) {return true;}
+            modulus *= prime;
+            residueWrapper = modEntryWrapper->residueHead;
+        }
+        primeWrapper = primeWrapper->prev;
+    }
     return false;
 }
 
@@ -216,16 +286,11 @@ bool tryAdvanced(uint64_t k) {
     PrimeWrapper* primeWrapperHead = NULL;
     bool result = false;
     
-    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
+    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead) ||
+    tryLargePowersOfSmallPrimes(primeWrapperHead, k) ||
+    tryLargePrimes()) {
         result = true;
     }
-    else if (tryLargePowersOfSmallPrimes()) {
-        result = true;
-    }
-    else if (tryLargePrimes()) {
-        result = true;
-    }
-
     (void)freePrimeWrappers(primeWrapperHead);
     (void)primesieve_free_iterator(&primeIterator);
     return result;

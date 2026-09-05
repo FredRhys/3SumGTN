@@ -28,3 +28,4 @@ Alternatively, I added the ```make run``` rule, which creates and then runs a de
 
 - The basic algorithm can find solutions to all but 12,993 integers below 1,000,000.
   - This is brought down to 7,321 by the first step of the advanced algorithm (small powers of small primes).
+  - This is brought down to 5,151 by the second step (large powers of small primes).
