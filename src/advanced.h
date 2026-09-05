@@ -6,7 +6,7 @@
 #include "wrappers.h"
 #include "formula.h"
 #include <stdbool.h>
-#include <stdlib> // for malloc
+#include <stdlib.h> // for malloc
 #include <inttypes.h>
 
 #define UINT21_MAX 0x1FFFFF
