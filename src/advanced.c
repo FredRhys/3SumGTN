@@ -145,18 +145,27 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     return true;
 }
 
-bool checkSolution(uint64_t residue, uint64_t modulus, uint64_t k) {
-    __int128_t dividand;
-    for (int64_t z = -DIVBOUND; z < DIVBOUND; z += modulus) {
-        dividand = (__int128_t)z * z * z - z - 6 * k;
-        if (checkFormulaResults(dividand, modulus, 3 * modulus, k, z)) {
-            return true;
-        }
+bool checkSolution(uint64_t modulus, uint64_t k, uint64_t z) {
+    if (z > UINT42_MAX) {return false;}
+    __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
+    if (checkFormulaResults(dividand, modulus, 3 * modulus, k, z)) {
+        return true;
     }
     return false;
 }
 
-bool checkAllSolutions(PrimeWrapper* primeWrapper, uint64_t k) {
+
+bool checkResidue(uint64_t residue, uint64_t modulus, uint64_t k) {
+    for (int64_t z = residue; z < DIVBOUND && z <= UINT42_MAX; z += modulus) {
+        if (checkSolution(modulus, k, z)) {return true;}
+    }
+    for (int64_t z = residue; z > -DIVBOUND && z > -UINT42_MAX; z -= modulus) {
+        if (checkSolution(modulus, k, z)) {return true;}
+    }
+    return false;
+}
+
+bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
     ModEntryWrapper* modEntryWrapper;
     ModEntry modEntry;
     ResidueWrapper* residueWrapper;
@@ -170,7 +179,7 @@ bool checkAllSolutions(PrimeWrapper* primeWrapper, uint64_t k) {
             residueWrapper = modEntryWrapper->residueHead;
             while (residueWrapper != NULL) {
                 residue = residueWrapper->residue;
-                if (checkSolution(residue, modulus, k)) {
+                if (checkResidue(residue, modulus, k)) {
                     return true;
                 }
                 residueWrapper = residueWrapper->prev;
@@ -194,7 +203,7 @@ bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator,
         *primeWrapperHead = malloc(sizeof(PrimeWrapper));
         **primeWrapperHead = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
     }
-    return checkAllSolutions(*primeWrapperHead, k);
+    return checkAllResidues(*primeWrapperHead, k);
 }
 
 bool tryLargePowersOfSmallPrimes() {
