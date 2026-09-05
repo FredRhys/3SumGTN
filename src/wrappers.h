@@ -2,6 +2,7 @@
 #define WRAPPERS_H
 
 #include <stdlib.h>
+#include <inttypes.h>
 #include "../libmontmul/montmul.h"
 
 typedef struct ResidueWrapper {

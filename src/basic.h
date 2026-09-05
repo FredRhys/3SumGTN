@@ -5,8 +5,6 @@
 
 #include <stdbool.h>
 #include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
 #include "formula.h"
 
 // functions from factor64

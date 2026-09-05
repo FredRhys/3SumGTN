@@ -3,10 +3,10 @@ LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
 		 -O3\
-		 -pedantic\
-		 -g\
-		 -fsanitize=address\
-		 -fsanitize=undefined
+ 		 -pedantic
+# 		 -g\
+# 		 -fsanitize=address\
+# 		 -fsanitize=undefined
 
 buildfiles := build build/main.o build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
 
