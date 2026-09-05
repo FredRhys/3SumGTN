@@ -49,7 +49,7 @@ void checkOffsetIsRoot(ModEntryWrapper* modEntryWrapper, uint64_t _6k, uint64_t 
     }
 }
 
-bool extractRootsRunner(ModEntryWrapper* modEntryWrapper, uint64_t k) {
+bool extractRootsFromPrime(ModEntryWrapper* modEntryWrapper, uint64_t k) {
     Poly rootPoly;
     const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
     const uint64_t PRIME = MOD_ENTRY.modulus;
@@ -79,21 +79,68 @@ bool tryThisPrime(ModEntryWrapper* modEntryWrapper, uint64_t k) {
             appendResidue(modEntryWrapper, 0);
             return true;
         default:
-            return extractRootsRunner(modEntryWrapper, k);
+            return extractRootsFromPrime(modEntryWrapper, k);
     }    
+}
+
+void extractRootsWithHensels(ModEntryWrapper* modEntryWrapper, ModEntry primeEntry, uint64_t oldRoot, uint64_t denominator, uint64_t _6k) {
+    const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
+    const uint64_t MODULUS = MOD_ENTRY.modulus;
+    const uint64_t NEW_ROOT = submod(oldRoot,
+        montmul(invmod(denominator, primeEntry), applyMasterPoly(oldRoot, MOD_ENTRY, _6k), MOD_ENTRY),
+        MODULUS);
+    appendResidue(modEntryWrapper, NEW_ROOT);
+}
+
+void extractRootsWithBruteForce(ModEntryWrapper* modEntryWrapper, uint64_t _6k) {
+    const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
+    const uint64_t MODULUS = MOD_ENTRY.modulus;
+    // TODO can determine number of roots with implemented tools
+    for (uint64_t i = 0; i < MODULUS; i++) {
+        if (applyMasterPoly(i, MOD_ENTRY, _6k) != 0) {continue;}
+        appendResidue(modEntryWrapper, i);
+    }
+}
+
+void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* residueHead, ModEntry primeEntry, uint64_t _6k) {
+    const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
+    uint64_t residue;
+    while (residueHead != NULL) {
+        residue = residueHead->residue;
+        const uint64_t DENOMINATOR = applyMasterPolyDeriv(residue, MOD_ENTRY);
+        //TODO figure out why this doesn't accept modulus of 4.
+        if (DENOMINATOR != 0 && MOD_ENTRY.modulus > 4) {
+            (void)extractRootsWithHensels(modEntryWrapper, primeEntry, residue, DENOMINATOR, _6k);
+        }
+        else {
+            (void)extractRootsWithBruteForce(modEntryWrapper, _6k);
+            break;
+        }
+        residueHead = residueHead->prev;
+    }
 }
 
 bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
     ModEntry primeEntry = primeModEntry(prime);
     ModEntryWrapper first = makeModEntryWrapper(primeEntry, NULL);
     if (!tryThisPrime(&first, k)) {return false;}
-
-    // exponent loop
-
+    ResidueWrapper* residueHead = first.residueHead;
     *firstPtr = malloc(sizeof(ModEntryWrapper));
     **firstPtr = first;
     *lastPtr = malloc(sizeof(ModEntryWrapper));
     **lastPtr = first;
+    ModEntryWrapper last;
+    uint64_t modulus = prime * prime;
+    ModEntry modEntry = increasePrimeModEntryPower(primeEntry, primeEntry);
+    while (modulus <= SQRT_DIVBOUND) {
+        last = makeModEntryWrapper(modEntry, *lastPtr);
+        (void)extractRootsFromPower(&last, residueHead, primeEntry, (6*k)%modulus);
+        *lastPtr = malloc(sizeof(ModEntryWrapper));
+        **lastPtr = last;
+        modulus *= prime;
+        modEntry = increasePrimeModEntryPower(modEntry, primeEntry);
+        residueHead = last.residueHead;
+    }
     return true;
 }
 
