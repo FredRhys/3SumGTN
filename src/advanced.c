@@ -121,7 +121,7 @@ void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* res
     }
 }
 
-bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
+bool tryPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
     ModEntry primeEntry = primeModEntry(prime);
     ModEntryWrapper first = makeModEntryWrapper(primeEntry, NULL);
     if (!tryThisPrime(&first, k)) {return false;}
@@ -194,7 +194,7 @@ bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator,
     ModEntryWrapper* lastModEntryWrapper;
     uint64_t prime;
     while ((prime = primesieve_next_prime(primeIterator)) < SQRT_DIVBOUND) {
-        if (!trySmallPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
+        if (!tryPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
         temp = *primeWrapper;
         *primeWrapper = malloc(sizeof(PrimeWrapper));
         **primeWrapper = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
