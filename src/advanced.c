@@ -202,71 +202,50 @@ bool tryPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, Prim
     return checkAllResidues(*primeWrapper, k);
 }
 
-bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t residue1, ModEntry modEntry1, uint64_t k) {
-    if (primeWrapper == NULL) {
-        // base case
-        if (checkResidueRunner(residue1, modEntry1.modulus, k)) {return true;}
-        // if (modEntry1.modulus < SQRT_DIVBOUND) {
-        //     fprintf(resultsDotTxt, "%"PRIu64"\n", modEntry1.modulus);
-        // }
-        return false;
+bool tryCompositeModulus(uint64_t modulus, uint64_t residue, uint64_t k) {
+    if (checkResidueRunner(residue, modulus, k)) {return true;}
+    if (modulus < SQRT_DIVBOUND) {
+        // hello world
     }
-    if (tryProductsOfSmallPrimes(primeWrapper->prev, residue1, modEntry1, k)) {return true;}
-    ModEntryWrapper* modEntryWrapper = primeWrapper->lastModEntryWrapper;
+    return false;
+}
+
+bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, ModEntryWrapper* compositeWrapper, ModEntry modEntry1, uint64_t residue1, uint64_t k) {
+    if (primeWrapper == NULL) {
+        return tryCompositeModulus(modEntry1.modulus, residue1, k);
+    }
+    if (tryProductsOfSmallPrimes(primeWrapper->prev, compositeWrapper, modEntry1, residue1, k)) {return true;}
+    ModEntryWrapper* modEntryWrapper2 = primeWrapper->lastModEntryWrapper;
     ModEntry modEntry2, newModEntry;
     ResidueWrapper* residueWrapper;
     uint64_t newResidue;
-    while (modEntryWrapper != NULL) {
-        modEntry2 = modEntryWrapper->modEntry;
-        residueWrapper = modEntryWrapper->residueHead;
-        while (residueWrapper != NULL) {
-            newModEntry = combineCoprimeModEntries(modEntry1, modEntry2);
-            // may be a better way of doing this.
-            // we know that large powers can multiply with at most one small modulus.
-            if (newModEntry.modulus > DIVBOUND) {return false;}
-            newResidue = crtCalc(residue1, modEntry1, residueWrapper->residue, modEntry2, newModEntry);
-            if (tryProductsOfSmallPrimes(primeWrapper->prev, newResidue, newModEntry, k)) {return true;}
-            residueWrapper = residueWrapper->prev;
+    while (modEntryWrapper2 != NULL) {
+        modEntry2 = modEntryWrapper2->modEntry;
+        newModEntry = combineCoprimeModEntries(modEntry1, modEntry2);
+        // may be a better way of doing this.
+        // we know that large powers can multiply with at most one small modulus.
+        if (newModEntry.modulus < DIVBOUND) {
+            residueWrapper = modEntryWrapper2->residueHead;
+            while (residueWrapper != NULL) {
+                newResidue = crtCalc(residue1, modEntry1, residueWrapper->residue, modEntry2, newModEntry);
+                if (tryProductsOfSmallPrimes(primeWrapper->prev, compositeWrapper, newModEntry, newResidue, k)) {return true;}
+                residueWrapper = residueWrapper->prev;
+            }
         }
-        modEntryWrapper = modEntryWrapper->prev;
+        modEntryWrapper2 = modEntryWrapper2->prev;
     }
     return false;
 }
 
-bool tryWithAllResidues(PrimeWrapper* primeWrapper, ModEntryWrapper modEntryWrapper2, uint64_t k) {
-    ModEntryWrapper* modEntryWrapper1;
-    ModEntry entry1, entry2 = modEntryWrapper2.modEntry, newEntry;
-    ResidueWrapper* residueWrapper1,* residueWrapper2 = modEntryWrapper2.residueHead;
-    uint64_t residue1, residue2, newResidue;
-    while (residueWrapper2 != NULL) {
-        residue2 = residueWrapper2->residue;
-        if (checkResidueRunner(residue2, entry2.modulus, k)) {
-            return true;
-        }
-        while (primeWrapper != NULL) {
-            modEntryWrapper1 = primeWrapper->lastModEntryWrapper;
-            while (modEntryWrapper1 != NULL) {
-                entry1 = modEntryWrapper1->modEntry;
-                newEntry = combineCoprimeModEntries(entry1, entry2);
-                residueWrapper1 = modEntryWrapper1->residueHead;
-                while (residueWrapper1 != NULL) {
-                    residue1 = residueWrapper1->residue;
-                    newResidue = crtCalc(residue1, entry1, residue2, entry2, newEntry);
-                    if (checkResidueRunner(newResidue, newEntry.modulus, k)) {
-                        return true;
-                    }
-                    residueWrapper2 = residueWrapper2->prev;
-                    residueWrapper1 = residueWrapper1->prev;
-                }
-            modEntryWrapper1 = modEntryWrapper1->prev;
-            }        
-            primeWrapper = primeWrapper->prev;
-        }
+bool tryLargePrimes(uint64_t k, primesieve_iterator* primeIterator) {
+    ModEntryWrapper modEntryWrapper;
+    ModEntry modEntry;
+    uint64_t prime;
+    while ((prime = primesieve_next_prime(primeIterator)) < DIVBOUND) {
+        modEntry = primeModEntry(prime);
+        modEntryWrapper = makeModEntryWrapper(modEntry, NULL);
+        if (!tryThisPrime(&modEntryWrapper, k)) {continue;}
     }
-    return false;
-}
-
-bool tryLargePrimes() {
     return false;
 }
 
@@ -274,16 +253,18 @@ bool tryAdvanced(uint64_t k) {
     primesieve_iterator primeIterator;
     (void)primesieve_init(&primeIterator);
     PrimeWrapper* primeWrapperHead = NULL;
+    ModEntryWrapper* compositeWrapper = NULL;
     bool result = false;
+
     const ModEntry ONE_ENTRY = makeModEntry(1, 18446744073709551615ULL, 0, 1);
 
     if (tryPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
         result = true;
     }
-    else if (tryProductsOfSmallPrimes(primeWrapperHead, 0, ONE_ENTRY, k)){
+    else if (tryProductsOfSmallPrimes(primeWrapperHead, compositeWrapper, ONE_ENTRY, 0, k)){
         result = true;
     }
-    else if (tryLargePrimes()) {
+    else if (tryLargePrimes(k, &primeIterator)) {
         result = true;
     }
     (void)freePrimeWrappers(primeWrapperHead);
