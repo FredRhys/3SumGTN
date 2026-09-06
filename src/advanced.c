@@ -133,7 +133,7 @@ bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** res
     ModEntryWrapper last;
     uint64_t modulus = prime * prime;
     ModEntry modEntry = increasePrimeModEntryPower(primeEntry, primeEntry);
-    while (modulus < SQRT_DIVBOUND) {
+    while (modulus < DIVBOUND) {
         last = makeModEntryWrapper(modEntry, *lastPtr);
         (void)extractRootsFromPower(&last, residueHead, primeEntry, k);
         *lastPtr = malloc(sizeof(ModEntryWrapper));
@@ -276,9 +276,10 @@ bool tryAdvanced(uint64_t k) {
     PrimeWrapper* primeWrapperHead = NULL;
     bool result = false;
     
-    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead) ||
-    tryLargePowersOfSmallPrimes(primeWrapperHead, k) ||
-    tryLargePrimes()) {
+    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
+        result = true;
+    }
+    else if (tryLargePrimes()) {
         result = true;
     }
     (void)freePrimeWrappers(primeWrapperHead);
