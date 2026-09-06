@@ -202,6 +202,35 @@ bool tryPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, Prim
     return checkAllResidues(*primeWrapper, k);
 }
 
+bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t residue1, ModEntry modEntry1) {
+    if (primeWrapper == NULL) {
+        if (modEntry1.modulus < SQRT_DIVBOUND) {
+            fprintf(resultsDotTxt, "%"PRIu64"\n", modEntry1.modulus);
+        }
+        // base case. check for solution.
+        return false;
+    }
+    
+    if (tryProductsOfSmallPrimes(primeWrapper->prev, residue1, modEntry1)) {return true;}
+    ModEntryWrapper* modEntryWrapper = primeWrapper->lastModEntryWrapper;
+    ModEntry modEntry2, newModEntry;
+    ResidueWrapper* residueWrapper;
+    uint64_t newResidue;
+    while (modEntryWrapper != NULL) {
+        modEntry2 = modEntryWrapper->modEntry;
+        residueWrapper = modEntryWrapper->residueHead;
+        while (residueWrapper != NULL) {
+            newModEntry = combineCoprimeModEntries(modEntry1, modEntry2);
+            if (newModEntry.modulus > DIVBOUND) {return false;}
+            newResidue = crtCalc(residue1, modEntry1, residueWrapper->residue, modEntry2, newModEntry);
+            if (tryProductsOfSmallPrimes(primeWrapper->prev, newResidue, newModEntry)) {return true;}
+            residueWrapper = residueWrapper->prev;
+        }
+        modEntryWrapper = modEntryWrapper->prev;
+    }
+    return false;
+}
+
 bool tryWithAllResidues(PrimeWrapper* primeWrapper, ModEntryWrapper modEntryWrapper2, uint64_t k) {
     ModEntryWrapper* modEntryWrapper1;
     ModEntry entry1, entry2 = modEntryWrapper2.modEntry, newEntry;
@@ -244,8 +273,12 @@ bool tryAdvanced(uint64_t k) {
     (void)primesieve_init(&primeIterator);
     PrimeWrapper* primeWrapperHead = NULL;
     bool result = false;
-    
+    const ModEntry ONE_ENTRY = makeModEntry(1, 18446744073709551615ULL, 0, 1);
+
     if (tryPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
+        result = true;
+    }
+    else if (tryProductsOfSmallPrimes(primeWrapperHead, 0, ONE_ENTRY)){
         result = true;
     }
     else if (tryLargePrimes()) {
