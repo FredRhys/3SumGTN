@@ -202,16 +202,16 @@ bool tryPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, Prim
     return checkAllResidues(*primeWrapper, k);
 }
 
-bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t residue1, ModEntry modEntry1) {
+bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t residue1, ModEntry modEntry1, uint64_t k) {
     if (primeWrapper == NULL) {
-        if (modEntry1.modulus < SQRT_DIVBOUND) {
-            fprintf(resultsDotTxt, "%"PRIu64"\n", modEntry1.modulus);
-        }
-        // base case. check for solution.
+        // base case
+        if (checkResidueRunner(residue1, modEntry1.modulus, k)) {return true;}
+        // if (modEntry1.modulus < SQRT_DIVBOUND) {
+        //     fprintf(resultsDotTxt, "%"PRIu64"\n", modEntry1.modulus);
+        // }
         return false;
     }
-    
-    if (tryProductsOfSmallPrimes(primeWrapper->prev, residue1, modEntry1)) {return true;}
+    if (tryProductsOfSmallPrimes(primeWrapper->prev, residue1, modEntry1, k)) {return true;}
     ModEntryWrapper* modEntryWrapper = primeWrapper->lastModEntryWrapper;
     ModEntry modEntry2, newModEntry;
     ResidueWrapper* residueWrapper;
@@ -221,9 +221,11 @@ bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t residue1, Mod
         residueWrapper = modEntryWrapper->residueHead;
         while (residueWrapper != NULL) {
             newModEntry = combineCoprimeModEntries(modEntry1, modEntry2);
+            // may be a better way of doing this.
+            // we know that large powers can multiply with at most one small modulus.
             if (newModEntry.modulus > DIVBOUND) {return false;}
             newResidue = crtCalc(residue1, modEntry1, residueWrapper->residue, modEntry2, newModEntry);
-            if (tryProductsOfSmallPrimes(primeWrapper->prev, newResidue, newModEntry)) {return true;}
+            if (tryProductsOfSmallPrimes(primeWrapper->prev, newResidue, newModEntry, k)) {return true;}
             residueWrapper = residueWrapper->prev;
         }
         modEntryWrapper = modEntryWrapper->prev;
@@ -278,7 +280,7 @@ bool tryAdvanced(uint64_t k) {
     if (tryPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
         result = true;
     }
-    else if (tryProductsOfSmallPrimes(primeWrapperHead, 0, ONE_ENTRY)){
+    else if (tryProductsOfSmallPrimes(primeWrapperHead, 0, ONE_ENTRY, k)){
         result = true;
     }
     else if (tryLargePrimes()) {
