@@ -188,7 +188,7 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
     return false;
 }
 
-bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper) {
+bool tryPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper) {
     PrimeWrapper* temp;
     ModEntryWrapper* firstModEntryWrapper;
     ModEntryWrapper* lastModEntryWrapper;
@@ -235,37 +235,6 @@ bool tryWithAllResidues(PrimeWrapper* primeWrapper, ModEntryWrapper modEntryWrap
     return false;
 }
 
-// this doesn't work.
-bool tryLargePowersOfSmallPrimes(PrimeWrapper* primeWrapper, uint64_t k) {
-    //fprintf(stdout, "Here.\n");
-    ModEntryWrapper* modEntryWrapper,* primeEntryWrapper;
-    ResidueWrapper* residueWrapper;
-    ModEntry modEntry, primeEntry;
-    uint64_t modulus, prime;
-    bool result;
-    while (primeWrapper != NULL) {
-        primeEntryWrapper = primeWrapper->firstModEntryWrapper;
-        primeEntry = primeEntryWrapper->modEntry;
-        prime = primeEntry.modulus;
-        modEntryWrapper = primeWrapper->lastModEntryWrapper;
-        modEntry = modEntryWrapper->modEntry;
-        modulus = modEntry.modulus * prime;
-        residueWrapper = modEntryWrapper->residueHead;
-        while (modulus < SQRT_DIVBOUND) {
-            modEntry = increasePrimeModEntryPower(modEntry, primeEntry);
-            *modEntryWrapper = makeModEntryWrapper(modEntry, NULL);
-            (void)extractRootsFromPower(modEntryWrapper, residueWrapper, primeEntry, k);
-            if (tryWithAllResidues(primeWrapper->prev, *modEntryWrapper, k)) {result = true;}
-            freeResidueWrappers(residueWrapper);
-            if (result) {return true;}
-            modulus *= prime;
-            residueWrapper = modEntryWrapper->residueHead;
-        }
-        primeWrapper = primeWrapper->prev;
-    }
-    return false;
-}
-
 bool tryLargePrimes() {
     return false;
 }
@@ -276,7 +245,7 @@ bool tryAdvanced(uint64_t k) {
     PrimeWrapper* primeWrapperHead = NULL;
     bool result = false;
     
-    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
+    if (tryPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
         result = true;
     }
     else if (tryLargePrimes()) {
