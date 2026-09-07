@@ -245,6 +245,7 @@ bool tryLargePrimes(uint64_t k, primesieve_iterator* primeIterator) {
         modEntry = primeModEntry(prime);
         modEntryWrapper = makeModEntryWrapper(modEntry, NULL);
         if (!tryThisPrime(&modEntryWrapper, k)) {continue;}
+        freeResidueWrappers(modEntryWrapper.residueHead);
     }
     return false;
 }
