@@ -251,14 +251,29 @@ bool trySmallComposites(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeW
     return tryCRT(primeWrapper, compositeWrapper, ONE_ENTRY, 0, k);
 }
 
-// bool tryLargePowersOfSmallPrimes(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, uint64_t k) {
-//     while (primeWrapper != NULL) {
+bool tryWithSmallComposites(ModEntryWrapper* compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
+    ModEntry iteratedModEntry, newModEntry;
+    ResidueWrapper* residueWrapper;
+    uint64_t iteratedModulus, iteratedResidue, newResidue;
+    while (compositeWrapper != NULL) {
+        iteratedModEntry = compositeWrapper->modEntry;
+        iteratedModulus = iteratedModEntry.modulus;
+        if (iteratedModulus * inputModEntry.modulus < DIVBOUND) {
+            newModEntry = combineCoprimeModEntries(inputModEntry, iteratedModEntry);
+            residueWrapper = compositeWrapper->residueHead;
+            while (residueWrapper != NULL) {
+                iteratedResidue = residueWrapper->residue;
+                newResidue = crtCalc(inputResidue, inputModEntry, iteratedResidue, iteratedModEntry, newModEntry);
+                if (checkResidueRunner(newResidue, newModEntry.modulus, k)) {return true;}
+                residueWrapper = residueWrapper->prev;
+            }
+        }
+        compositeWrapper = compositeWrapper->prev;
+    }
+    return false;
+}
 
-//         primeWrapper = primeWrapper->prev;
-//     }
-// }
-
-bool tryLargePrimes(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, uint64_t k, primesieve_iterator* primeIterator) {
+bool tryLargePrimes(ModEntryWrapper* compositeWrapper, uint64_t k, primesieve_iterator* primeIterator) {
     ModEntryWrapper modEntryWrapper;
     ModEntry modEntry;
     ResidueWrapper* residueWrapper;
@@ -271,8 +286,7 @@ bool tryLargePrimes(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
         residueWrapper = modEntryWrapper.residueHead;
         while (residueWrapper != NULL) {
             residue = residueWrapper->residue;
-            // I think this is overkill.
-            if (tryCRT(primeWrapper, compositeWrapper, modEntry, residue, k)) {
+            if (tryWithSmallComposites(compositeWrapper, modEntry, residue, k)) {
                 result = true;
                 break;
             }
@@ -294,11 +308,13 @@ bool tryAdvanced(uint64_t k) {
     if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapper)) {
         result = true;
     }
-    else if (trySmallComposites(primeWrapper, &compositeWrapper, k)){
+    else if (trySmallComposites(primeWrapper, &compositeWrapper, k)) {
         result = true;
     }
-    // else if (tryLargePowersOfSmallPrimes)
-    else if (tryLargePrimes(primeWrapper, &compositeWrapper, k, &primeIterator)) {
+    // else if (tryLargePowersOfSmallPrimes(primeWrapper, compositeWrapper, k)) {
+    //     result = true;
+    // }
+    else if (tryLargePrimes(compositeWrapper, k, &primeIterator)) {
         result = true;
     }
     (void)freeModEntryWrappers(compositeWrapper);
