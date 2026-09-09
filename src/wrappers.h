@@ -27,6 +27,7 @@ ModEntryWrapper makeModEntryWrapper(ModEntry modEntry, ModEntryWrapper* prev);
 PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first, ModEntryWrapper* restrict last, PrimeWrapper* prev);
 void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue);
 void freeResidueWrappers(ResidueWrapper* head);
+void freeModEntryWrappers(ModEntryWrapper* head);
 void freePrimeWrappers(PrimeWrapper* head);
 
 #endif

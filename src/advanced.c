@@ -121,7 +121,7 @@ void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* res
     }
 }
 
-bool tryPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
+bool trySmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
     ModEntry primeEntry = primeModEntry(prime);
     ModEntryWrapper first = makeModEntryWrapper(primeEntry, NULL);
     if (!tryThisPrime(&first, k)) {return false;}
@@ -133,7 +133,7 @@ bool tryPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict
     ModEntryWrapper last;
     uint64_t modulus = prime * prime;
     ModEntry modEntry = increasePrimeModEntryPower(primeEntry, primeEntry);
-    while (modulus < DIVBOUND) {
+    while (modulus < SQRT_DIVBOUND) {
         last = makeModEntryWrapper(modEntry, *lastPtr);
         (void)extractRootsFromPower(&last, residueHead, primeEntry, k);
         *lastPtr = malloc(sizeof(ModEntryWrapper));
@@ -188,13 +188,13 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
     return false;
 }
 
-bool tryPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper) {
+bool trySmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper) {
     PrimeWrapper* temp;
     ModEntryWrapper* firstModEntryWrapper;
     ModEntryWrapper* lastModEntryWrapper;
     uint64_t prime;
     while ((prime = primesieve_next_prime(primeIterator)) < SQRT_DIVBOUND) {
-        if (!tryPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
+        if (!trySmallPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper)) {continue;}        
         temp = *primeWrapper;
         *primeWrapper = malloc(sizeof(PrimeWrapper));
         **primeWrapper = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
@@ -202,73 +202,107 @@ bool tryPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, Prim
     return checkAllResidues(*primeWrapper, k);
 }
 
-bool tryCompositeModulus(uint64_t modulus, uint64_t residue, uint64_t k) {
-    if (checkResidueRunner(residue, modulus, k)) {return true;}
-    if (modulus < SQRT_DIVBOUND) {
-        // hello world
+bool tryBaseCRT(ModEntryWrapper** compositeWrapper, ModEntry modEntry, uint64_t residue, uint64_t k) {
+    const uint64_t MODULUS = modEntry.modulus;
+    if (checkResidueRunner(residue, MODULUS, k)) {return true;}
+    if (MODULUS > SQRT_DIVBOUND) {return false;}
+    if (*compositeWrapper != NULL) {
+        ModEntry compositeEntry = (*compositeWrapper)->modEntry;
+        if (compositeEntry.modulus == MODULUS) {
+            goto tryBaseCRT_appendResidue;
+        }
     }
+    ModEntryWrapper* OLD = *compositeWrapper;
+    *compositeWrapper = malloc(sizeof(ModEntryWrapper));
+    **compositeWrapper = makeModEntryWrapper(modEntry, OLD);
+tryBaseCRT_appendResidue:
+    appendResidue(*compositeWrapper, residue);
     return false;
 }
 
-bool tryProductsOfSmallPrimes(PrimeWrapper* primeWrapper, ModEntryWrapper* compositeWrapper, ModEntry modEntry1, uint64_t residue1, uint64_t k) {
+// Runs Chinese Remainder Theorem to iterate over all available composite moduli.
+bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
     if (primeWrapper == NULL) {
-        return tryCompositeModulus(modEntry1.modulus, residue1, k);
+        return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k);
     }
-    if (tryProductsOfSmallPrimes(primeWrapper->prev, compositeWrapper, modEntry1, residue1, k)) {return true;}
-    ModEntryWrapper* modEntryWrapper2 = primeWrapper->lastModEntryWrapper;
-    ModEntry modEntry2, newModEntry;
+    if (tryCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+    ModEntryWrapper* modEntryIterator = primeWrapper->lastModEntryWrapper;
+    ModEntry iteratedModEntry, newModEntry;
     ResidueWrapper* residueWrapper;
     uint64_t newResidue;
-    while (modEntryWrapper2 != NULL) {
-        modEntry2 = modEntryWrapper2->modEntry;
-        newModEntry = combineCoprimeModEntries(modEntry1, modEntry2);
-        // may be a better way of doing this.
-        // we know that large powers can multiply with at most one small modulus.
-        if (newModEntry.modulus < DIVBOUND) {
-            residueWrapper = modEntryWrapper2->residueHead;
+    while (modEntryIterator != NULL) {
+        iteratedModEntry = modEntryIterator->modEntry;
+        if (inputModEntry.modulus * iteratedModEntry.modulus < DIVBOUND) {
+            newModEntry = combineCoprimeModEntries(inputModEntry, iteratedModEntry);
+            residueWrapper = modEntryIterator->residueHead;
             while (residueWrapper != NULL) {
-                newResidue = crtCalc(residue1, modEntry1, residueWrapper->residue, modEntry2, newModEntry);
-                if (tryProductsOfSmallPrimes(primeWrapper->prev, compositeWrapper, newModEntry, newResidue, k)) {return true;}
+                newResidue = crtCalc(inputResidue, inputModEntry, residueWrapper->residue, iteratedModEntry, newModEntry);
+                if (tryCRT(primeWrapper->prev, compositeWrapper, newModEntry, newResidue, k)) {return true;}
                 residueWrapper = residueWrapper->prev;
             }
         }
-        modEntryWrapper2 = modEntryWrapper2->prev;
+        modEntryIterator = modEntryIterator->prev;
     }
     return false;
 }
 
-bool tryLargePrimes(uint64_t k, primesieve_iterator* primeIterator) {
+bool trySmallComposites(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, uint64_t k) {
+    const ModEntry ONE_ENTRY = makeModEntry(1, 18446744073709551615ULL, 0, 1); // precomputed values
+    return tryCRT(primeWrapper, compositeWrapper, ONE_ENTRY, 0, k);
+}
+
+// bool tryLargePowersOfSmallPrimes(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, uint64_t k) {
+//     while (primeWrapper != NULL) {
+
+//         primeWrapper = primeWrapper->prev;
+//     }
+// }
+
+bool tryLargePrimes(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, uint64_t k, primesieve_iterator* primeIterator) {
     ModEntryWrapper modEntryWrapper;
     ModEntry modEntry;
-    uint64_t prime;
+    ResidueWrapper* residueWrapper;
+    bool result = false;
+    uint64_t prime, residue;
     while ((prime = primesieve_next_prime(primeIterator)) < DIVBOUND) {
         modEntry = primeModEntry(prime);
         modEntryWrapper = makeModEntryWrapper(modEntry, NULL);
         if (!tryThisPrime(&modEntryWrapper, k)) {continue;}
+        residueWrapper = modEntryWrapper.residueHead;
+        while (residueWrapper != NULL) {
+            residue = residueWrapper->residue;
+            // I think this is overkill.
+            if (tryCRT(primeWrapper, compositeWrapper, modEntry, residue, k)) {
+                result = true;
+                break;
+            }
+            residueWrapper = residueWrapper->prev;
+        }
         freeResidueWrappers(modEntryWrapper.residueHead);
+        if (result) {break;}
     }
-    return false;
+    return result;
 }
 
 bool tryAdvanced(uint64_t k) {
     primesieve_iterator primeIterator;
     (void)primesieve_init(&primeIterator);
-    PrimeWrapper* primeWrapperHead = NULL;
+    PrimeWrapper* primeWrapper = NULL;
     ModEntryWrapper* compositeWrapper = NULL;
     bool result = false;
 
-    const ModEntry ONE_ENTRY = makeModEntry(1, 18446744073709551615ULL, 0, 1);
-
-    if (tryPowersOfSmallPrimes(k, &primeIterator, &primeWrapperHead)) {
+    if (trySmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapper)) {
         result = true;
     }
-    else if (tryProductsOfSmallPrimes(primeWrapperHead, compositeWrapper, ONE_ENTRY, 0, k)){
+    else if (trySmallComposites(primeWrapper, &compositeWrapper, k)){
         result = true;
     }
-    else if (tryLargePrimes(k, &primeIterator)) {
+    // else if (tryLargePowersOfSmallPrimes)
+    else if (tryLargePrimes(primeWrapper, &compositeWrapper, k, &primeIterator)) {
         result = true;
     }
-    (void)freePrimeWrappers(primeWrapperHead);
+    (void)freeModEntryWrappers(compositeWrapper);
+    (void)freePrimeWrappers(primeWrapper);
     (void)primesieve_free_iterator(&primeIterator);
     return result;
 }
