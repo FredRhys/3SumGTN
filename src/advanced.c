@@ -220,12 +220,9 @@ tryBaseCRT_appendResidue:
     return false;
 }
 
-// Runs Chinese Remainder Theorem to iterate over all available composite moduli.
-bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
-    if (primeWrapper == NULL) {
-        return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k);
-    }
-    if (tryCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k);
+
+bool crtSmallPowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
     ModEntryWrapper* modEntryIterator = primeWrapper->lastModEntryWrapper;
     ModEntry iteratedModEntry, newModEntry;
     ResidueWrapper* residueWrapper;
@@ -243,6 +240,47 @@ bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModE
         }
         modEntryIterator = modEntryIterator->prev;
     }
+    return false;
+}
+
+bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
+    ModEntryWrapper* primeEntryWrapper = primeWrapper->firstModEntryWrapper;
+    const ModEntry primeEntry = primeEntryWrapper->modEntry;
+    ModEntryWrapper* powerEntryWrapper = primeWrapper->lastModEntryWrapper;
+    ResidueWrapper* residueWrapper = powerEntryWrapper->residueHead;
+    ModEntry powerEntry = increasePrimeModEntryPower(powerEntryWrapper->modEntry, primeEntry);
+    uint64_t residue;
+    *powerEntryWrapper = makeModEntryWrapper(powerEntry, NULL);
+    bool freeing = false;
+    while (powerEntry.modulus < DIVBOUND) {
+        (void)extractRootsFromPower(powerEntryWrapper, residueWrapper, primeEntry, k);
+        if (freeing) {
+            (void)freeResidueWrappers(residueWrapper);
+        }
+        residueWrapper = powerEntryWrapper->residueHead;
+        while (residueWrapper != NULL) {
+            residue = residueWrapper->residue;
+            residueWrapper = residueWrapper->prev;
+        }
+        residueWrapper = powerEntryWrapper->residueHead;
+        powerEntry = increasePrimeModEntryPower(powerEntry, primeEntry);
+        *powerEntryWrapper = makeModEntryWrapper(powerEntry, NULL);
+        if (!freeing) {
+            freeing = true;
+        }
+    }
+    return true;
+}
+
+// Runs Chinese Remainder Theorem to iterate over all available composite moduli.
+bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
+    if (primeWrapper == NULL) {
+        return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k);
+    }
+    if (tryCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+    if (crtSmallPowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+    if (inputModEntry.modulus > SQRT_DIVBOUND) {return false;}
+    //if (crtLargePowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     return false;
 }
 
@@ -311,9 +349,6 @@ bool tryAdvanced(uint64_t k) {
     else if (trySmallComposites(primeWrapper, &compositeWrapper, k)) {
         result = true;
     }
-    // else if (tryLargePowersOfSmallPrimes(primeWrapper, compositeWrapper, k)) {
-    //     result = true;
-    // }
     else if (tryLargePrimes(compositeWrapper, k, &primeIterator)) {
         result = true;
     }
