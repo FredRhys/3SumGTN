@@ -16,9 +16,9 @@ PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first,
 }
 
 void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue) {
-    ResidueWrapper* prev = modEntryWrapper->residueHead;
-    modEntryWrapper->residueHead = malloc(sizeof(ResidueWrapper));
-    *(modEntryWrapper->residueHead) = makeResidueWrapper(residue, prev);
+    ResidueWrapper* prev = modEntryWrapper->residueWrapper;
+    modEntryWrapper->residueWrapper = malloc(sizeof(ResidueWrapper));
+    *(modEntryWrapper->residueWrapper) = makeResidueWrapper(residue, prev);
 }
 
 void freeResidueWrappers(ResidueWrapper* head) {
@@ -36,7 +36,7 @@ void freeModEntryWrappers(ModEntryWrapper* head) {
     while (head != NULL) {
         temp = head->prev;
         //fprintf(stdout, "%"PRIu64": ", head->modEntry.modulus);
-        (void)freeResidueWrappers(head->residueHead);
+        (void)freeResidueWrappers(head->residueWrapper);
         (void)free(head);
         //putchar('\n');
         head = temp;

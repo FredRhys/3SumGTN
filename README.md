@@ -27,3 +27,10 @@ Alternatively, I added the ```make run``` rule, which creates and then runs a de
 - The smallest integer the basic algorithm can't find a solution to is 107 = (&minus;393)C3 + (328)C3 + (298)C3.
 
 - The basic algorithm can find solutions to all but 12,993 integers below 1,000,000.
+
+
+Failures below 100,000:
+    basic: 1,731                    (1.731%)
+    advanced small primes: 402      (0.402%)
+    advanced small composites: 31   (0.031%)
+    advanced large primes: 12       (0.012%)

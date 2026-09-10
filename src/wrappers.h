@@ -12,7 +12,7 @@ typedef struct ResidueWrapper {
 
 typedef struct ModEntryWrapper {
     ModEntry modEntry;
-    ResidueWrapper* residueHead;
+    ResidueWrapper* residueWrapper;
     struct ModEntryWrapper* prev; // the ModEntryWrapper head should be that with the greatest modulus.
 }ModEntryWrapper;
 
