@@ -290,7 +290,7 @@ bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModE
         return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k);
     }
     if (tryCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
-    if (crtSmallPowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+    if (crtSmallPowers(primeWrapperF, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     if (inputModEntry.modulus > SQRT_DIVBOUND) {return false;}
     if (crtLargePowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     return false;
