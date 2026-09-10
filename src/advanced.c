@@ -249,10 +249,13 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
     ModEntryWrapper powerEntryWrapper = *(primeWrapper->lastModEntryWrapper);
     ResidueWrapper* residueWrapper = powerEntryWrapper.residueHead;
     ModEntry powerEntry = increasePrimeModEntryPower(powerEntryWrapper.modEntry, primeEntry);
-    uint64_t residue;
+    ModEntry newModEntry;
+    const uint64_t INPUT_MODULUS = inputModEntry.modulus;
+    uint64_t residue, newResidue;
     powerEntryWrapper = makeModEntryWrapper(powerEntry, NULL);
-    bool freeing = false;
-    while (powerEntry.modulus < DIVBOUND) {
+    bool freeing = false, result = false;
+    while (powerEntry.modulus * INPUT_MODULUS < DIVBOUND) {
+        newModEntry = combineCoprimeModEntries(powerEntry, inputModEntry);
         (void)extractRootsFromPower(&powerEntryWrapper, residueWrapper, primeEntry, k);
         if (freeing) {
             (void)freeResidueWrappers(residueWrapper);
@@ -260,17 +263,25 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
         residueWrapper = powerEntryWrapper.residueHead;
         while (residueWrapper != NULL) {
             residue = residueWrapper->residue;
+            newResidue = crtCalc(residue, powerEntry, inputResidue, inputModEntry, newModEntry);
+            if (tryCRT(primeWrapper, compositeWrapper, newModEntry, newResidue, k)) {
+                result = true;
+                break;
+            }
             residueWrapper = residueWrapper->prev;
         }
         residueWrapper = powerEntryWrapper.residueHead;
         powerEntry = increasePrimeModEntryPower(powerEntry, primeEntry);
         powerEntryWrapper = makeModEntryWrapper(powerEntry, &powerEntryWrapper);
+        if (result) {break;}
         if (!freeing) {
             freeing = true;
         }
     }
-    (void)freeResidueWrappers(residueWrapper);
-    return true;
+    if (freeing) {
+        (void)freeResidueWrappers(residueWrapper);
+    }
+    return result;
 }
 
 // Runs Chinese Remainder Theorem to iterate over all available composite moduli.
