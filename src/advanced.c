@@ -244,31 +244,32 @@ bool crtSmallPowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
 }
 
 bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
-    ModEntryWrapper* primeEntryWrapper = primeWrapper->firstModEntryWrapper;
-    const ModEntry primeEntry = primeEntryWrapper->modEntry;
-    ModEntryWrapper* powerEntryWrapper = primeWrapper->lastModEntryWrapper;
-    ResidueWrapper* residueWrapper = powerEntryWrapper->residueHead;
-    ModEntry powerEntry = increasePrimeModEntryPower(powerEntryWrapper->modEntry, primeEntry);
+    const ModEntryWrapper primeEntryWrapper = *(primeWrapper->firstModEntryWrapper);
+    const ModEntry primeEntry = primeEntryWrapper.modEntry;
+    ModEntryWrapper powerEntryWrapper = *(primeWrapper->lastModEntryWrapper);
+    ResidueWrapper* residueWrapper = powerEntryWrapper.residueHead;
+    ModEntry powerEntry = increasePrimeModEntryPower(powerEntryWrapper.modEntry, primeEntry);
     uint64_t residue;
-    *powerEntryWrapper = makeModEntryWrapper(powerEntry, NULL);
+    powerEntryWrapper = makeModEntryWrapper(powerEntry, NULL);
     bool freeing = false;
     while (powerEntry.modulus < DIVBOUND) {
-        (void)extractRootsFromPower(powerEntryWrapper, residueWrapper, primeEntry, k);
+        (void)extractRootsFromPower(&powerEntryWrapper, residueWrapper, primeEntry, k);
         if (freeing) {
             (void)freeResidueWrappers(residueWrapper);
         }
-        residueWrapper = powerEntryWrapper->residueHead;
+        residueWrapper = powerEntryWrapper.residueHead;
         while (residueWrapper != NULL) {
             residue = residueWrapper->residue;
             residueWrapper = residueWrapper->prev;
         }
-        residueWrapper = powerEntryWrapper->residueHead;
+        residueWrapper = powerEntryWrapper.residueHead;
         powerEntry = increasePrimeModEntryPower(powerEntry, primeEntry);
-        *powerEntryWrapper = makeModEntryWrapper(powerEntry, NULL);
+        powerEntryWrapper = makeModEntryWrapper(powerEntry, &powerEntryWrapper);
         if (!freeing) {
             freeing = true;
         }
     }
+    (void)freeResidueWrappers(residueWrapper);
     return true;
 }
 
@@ -280,7 +281,7 @@ bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModE
     if (tryCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     if (crtSmallPowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     if (inputModEntry.modulus > SQRT_DIVBOUND) {return false;}
-    //if (crtLargePowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+    if (crtLargePowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     return false;
 }
 
