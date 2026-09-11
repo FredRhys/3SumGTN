@@ -52,9 +52,9 @@ Poly getMonicPoly(Poly operand, ModEntry modEntry) {
 }
 
 Poly getRootPoly(ModEntry modEntry, uint64_t int_6k, uint64_t offset) {
-    const uint64_t prime = modEntry.modulus;
-    uint64_t exponent = (prime-1)/2;
-    Poly base = makePoly(0, 1, (offset == 0) ? 0 : prime - offset);
+    const uint64_t PRIME = modEntry.modulus;
+    uint64_t exponent = (PRIME-1)/2;
+    Poly base = makePoly(0, 1, submod(0, offset, PRIME));
     Poly result = makePoly(0, 0, 1);
 
     while (exponent > 0) {
@@ -64,7 +64,7 @@ Poly getRootPoly(ModEntry modEntry, uint64_t int_6k, uint64_t offset) {
         base = mulPoly(base, base, modEntry, int_6k);
         exponent >>= 1;
     }
-    result.deg0 = addmod(result.deg0, 1, prime);
+    result.deg0 = addmod(result.deg0, 1, PRIME);
     return result;
 }
 
@@ -75,4 +75,40 @@ uint64_t applyMasterPoly(uint64_t operand, ModEntry modEntry, uint64_t int_6k) {
 
 uint64_t applyMasterPolyDeriv(uint64_t operand, ModEntry modEntry) {
     return submod(montmul(3, montexp(operand, 2, modEntry), modEntry), 1, modEntry.modulus);
+}
+
+uint8_t degreeOfPoly(Poly operand) {
+    if (operand.deg2 != 0) {return 2;}
+    if (operand.deg1 != 0) {return 1;}
+    return 0;
+}
+
+Poly gcdPoly(Poly operand, ModEntry modEntry, uint64_t _6k) {
+	const uint64_t PRIME = modEntry.modulus;
+	operand = getMonicPoly(operand, modEntry);
+	uint8_t degree = degreeOfPoly(operand);
+	if (degree == 2) {
+			const uint64_t deg1 = operand.deg1;
+			const uint64_t deg0 = operand.deg0;
+			const uint64_t denominator = submod(submod(montexp(deg1, 2, modEntry), deg0, PRIME), 1, PRIME);
+			const uint64_t numerator = submod(montmul(deg1, deg0, modEntry), _6k, PRIME);
+			if (denominator == 0) {
+				if (numerator == 0) {
+					return operand;
+				}
+				else {
+					goto fail;
+				}
+			}
+			operand = makePoly(0, 1, montmul(numerator, invmod(denominator, modEntry), modEntry));
+	}
+	else if (degree == 0) {
+		goto fail;
+	}
+	const uint64_t deg0 = PRIME - operand.deg0;
+	if (applyMasterPoly(deg0, modEntry, _6k) == 0) {
+		return operand;
+	}
+    fail:
+	return makePoly(0, 0, 0);
 }

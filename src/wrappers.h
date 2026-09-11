@@ -1,0 +1,33 @@
+#ifndef WRAPPERS_H
+#define WRAPPERS_H
+
+#include <stdlib.h>
+#include <inttypes.h>
+#include "../libmontmul/montmul.h"
+
+typedef struct ResidueWrapper {
+    uint64_t residue;
+    struct ResidueWrapper* prev; // added in incidence order
+}ResidueWrapper;
+
+typedef struct ModEntryWrapper {
+    ModEntry modEntry;
+    ResidueWrapper* residueWrapper;
+    struct ModEntryWrapper* prev; // the ModEntryWrapper head should be that with the greatest modulus.
+}ModEntryWrapper;
+
+typedef struct PrimeWrapper {
+    ModEntryWrapper* firstModEntryWrapper;
+    ModEntryWrapper* lastModEntryWrapper;
+    struct PrimeWrapper* prev; // the PrimeWrapper head should be that with the greatest modulus.
+}PrimeWrapper;
+
+ResidueWrapper makeResidueWrapper(uint64_t residue, ResidueWrapper* prev);
+ModEntryWrapper makeModEntryWrapper(ModEntry modEntry, ModEntryWrapper* prev);
+PrimeWrapper makePrimeWrapper(ModEntryWrapper* restrict first, ModEntryWrapper* restrict last, PrimeWrapper* prev);
+void appendResidue(ModEntryWrapper* modEntryWrapper, uint64_t residue);
+void freeResidueWrappers(ResidueWrapper* head);
+void freeModEntryWrappers(ModEntryWrapper* head);
+void freePrimeWrappers(PrimeWrapper* head);
+
+#endif
