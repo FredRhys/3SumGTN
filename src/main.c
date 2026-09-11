@@ -21,6 +21,7 @@ void mainloop(uint64_t range, uint64_t threads) {
         if (tryBasic(i)) {continue;}
         if (tryPreliminary(i)) {continue;}
         if (tryAdvanced(i)) {continue;}
+        if (tryBasicMax(i)) {continue;}
         (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
     }
 }
