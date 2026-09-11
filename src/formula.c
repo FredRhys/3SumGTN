@@ -51,15 +51,7 @@ int64_t adjustSolutions(int64_t operand) {
 	return (operand == 0 || operand == 1) ? 0 : operand + 1;
 }
 
-bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d, uint64_t k, int64_t z) {
-	__int128_t disc = 4 * (divisor+abs128(dividend)) - (__int128_t)divisor * divisor * divisor;
-	int64_t sqrtand = disc/_3d;
-	if (sqrtand * _3d != disc) {return false;}
-	if ((divisor & 1) != (sqrtand & 1)) {return false;}
-	uint64_t formulaSqrt;
-    if (!iSqrt128(sqrtand, &formulaSqrt)) {return false;}
-
-	// printing results
+void fprintResults(uint64_t x, uint64_t y, uint64_t z, uint64_t k) {
 	z = adjustSolutions(z);
 	int64_t x = (divisor+formulaSqrt)/2;
 	int64_t y = ((int64_t)divisor - (int64_t)formulaSqrt)/2;
@@ -70,5 +62,15 @@ bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d, ui
 	x = adjustSolutions(x);
 	y = adjustSolutions(y);
 	(void)fprintf(resultsDotTxt, "%ld : %ld / %ld / %ld\n", k, x, y, z);
+}
+
+bool checkFormulaResults(__int128_t dividend, uint64_t divisor, uint64_t _3d, uint64_t k, int64_t z) {
+	__int128_t disc = 4 * (divisor+abs128(dividend)) - (__int128_t)divisor * divisor * divisor;
+	int64_t sqrtand = disc/_3d;
+	if (sqrtand * _3d != disc) {return false;}
+	if ((divisor & 1) != (sqrtand & 1)) {return false;}
+	uint64_t formulaSqrt;
+    if (!iSqrt128(sqrtand, &formulaSqrt)) {return false;}
+	(void)fprintfResults(x, y, z, k);	
 	return true;
 }
