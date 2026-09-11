@@ -19,6 +19,7 @@ Credit to AR Booker for the original [```factor64```](https://github.com/arbooke
 This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile.
 
 Running ```build/main RANGE THREADS``` will perform the search from 1 to ```RANGE``` using ```THREADS``` threads. For clarity, I used ```build/main 1000000 12``` for testing.
+Alternatively, I added the ```make run``` rule, which creates and then runs a default ```run.sh``` file. Creating your own in the above format will run the command on your values every time you run ```make run```.
 
 [CodeCogs](https://editor.codecogs.com/) was used for Latex rendering in ```README.md```.
 
@@ -26,3 +27,10 @@ Running ```build/main RANGE THREADS``` will perform the search from 1 to ```RANG
 - The smallest integer the basic algorithm can't find a solution to is 107 = (&minus;393)C3 + (328)C3 + (298)C3.
 
 - The basic algorithm can find solutions to all but 12,993 integers below 1,000,000.
+
+
+Failures below 100,000:
+    basic: 1,731                    (1.731%)
+    advanced small primes: 402      (0.402%)
+    advanced small composites: 31   (0.031%)
+    advanced large primes: 12       (0.012%)
