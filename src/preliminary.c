@@ -10,7 +10,7 @@ bool tryPreliminary(uint64_t k) {
     const uint64_t _6k = 6 * k;
     int64_t x, radicand;
     for (int64_t y = -2 * sqrtl(k); y > -UINT21_MAX; y--) {
-        radicand = _6k + 2 * (y - (uint64_t)y * y * y);
+        radicand = _6k + 2 * (y - (int64_t)y * y * y);
         x = cbrtl(radicand);
         if (isSolution(x, y, radicand, k)) {return true;}
         if (isSolution(x+1, y, radicand, k)) {return true;}        
