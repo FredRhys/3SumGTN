@@ -1,6 +1,6 @@
 #include "preliminary.h"
 
-bool isSolution(uint64_t x,  uint64_t y, uint64_t radicand, uint64_t k) {
+static bool isSolution(uint64_t x,  uint64_t y, uint64_t radicand, uint64_t k) {
     if ((uint64_t)x * x * x - x != radicand) {return false;}
     fprintfResults(x, y, y, k);
     return true;
