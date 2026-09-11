@@ -9,7 +9,6 @@
 #include <stdlib.h> // for malloc
 #include <inttypes.h>
 
-#define UINT21_MAX 0x1FFFFF
 #define UINT42_MAX 0x3FFFFFFFFFF
 #define DIVBOUND 545094
 #define SQRT_DIVBOUND 739

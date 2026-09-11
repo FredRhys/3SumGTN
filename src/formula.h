@@ -7,6 +7,8 @@
 #include <inttypes.h>
 #include <stdbit.h>
 
+#define UINT21_MAX 0x1FFFFF
+
 // global variables
 extern FILE* resultsDotTxt;
 

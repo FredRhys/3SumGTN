@@ -12,5 +12,6 @@ int initfactor64(const char*);
 int factor64(uint64_t*, int*, uint64_t);
 
 bool tryBasic(uint64_t k);
+bool tryBasicMax(uint64_t k);
 
 #endif
