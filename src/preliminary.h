@@ -2,6 +2,7 @@
 #define PRELIMINARY_H
 
 #include <inttypes.h>
+#include <stdio.h>
 #include <stdbool.h>
 
 extern FILE* resultsDotTxt;
