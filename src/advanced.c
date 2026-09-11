@@ -102,12 +102,12 @@ void extractRootsWithBruteForce(ModEntryWrapper* modEntryWrapper, uint64_t _6k) 
     }
 }
 
-void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* residueHead, ModEntry primeEntry, uint64_t k) {
+void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* residueWrapper, ModEntry primeEntry, uint64_t k) {
     const ModEntry MOD_ENTRY = modEntryWrapper->modEntry;
     const uint64_t _6k = montmul(6, k, MOD_ENTRY);
     uint64_t residue;
-    while (residueHead != NULL) {
-        residue = residueHead->residue;
+    while (residueWrapper != NULL) {
+        residue = residueWrapper->residue;
         const uint64_t DENOMINATOR = applyMasterPolyDeriv(residue, MOD_ENTRY);
         //TODO figure out why this doesn't accept modulus of 4.
         if (DENOMINATOR != 0 && MOD_ENTRY.modulus != 4) {
@@ -117,15 +117,15 @@ void extractRootsFromPower(ModEntryWrapper* modEntryWrapper, ResidueWrapper* res
             (void)extractRootsWithBruteForce(modEntryWrapper, _6k);
             break;
         }
-        residueHead = residueHead->prev;
+        residueWrapper = residueWrapper->prev;
     }
 }
 
 bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** restrict firstPtr, ModEntryWrapper** restrict lastPtr) {
     ModEntry primeEntry = primeModEntry(prime);
     ModEntryWrapper first = makeModEntryWrapper(primeEntry, NULL);
-    if (!tryThisPrime(&first, k)) {return false;}
-    ResidueWrapper* residueHead = first.residueHead;
+    if (!checkThisPrime(&first, k)) {return false;}
+    ResidueWrapper* residueWrapper = first.residueWrapper;
     *firstPtr = malloc(sizeof(ModEntryWrapper));
     **firstPtr = first;
     *lastPtr = malloc(sizeof(ModEntryWrapper));
@@ -135,12 +135,12 @@ bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** r
     ModEntry modEntry = increasePrimeModEntryPower(primeEntry, primeEntry);
     while (modulus < SQRT_DIVBOUND) {
         last = makeModEntryWrapper(modEntry, *lastPtr);
-        (void)extractRootsFromPower(&last, residueHead, primeEntry, k);
+        (void)extractRootsFromPower(&last, residueWrapper, primeEntry, k);
         *lastPtr = malloc(sizeof(ModEntryWrapper));
         **lastPtr = last;
         modulus *= prime;
         modEntry = increasePrimeModEntryPower(modEntry, primeEntry);
-        residueHead = last.residueHead;
+        residueWrapper = last.residueWrapper;
     }
     return true;
 }
@@ -172,7 +172,7 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k) {
         while (modEntryWrapper != NULL) {
             modEntry = modEntryWrapper->modEntry;
             modulus = modEntry.modulus;
-            residueWrapper = modEntryWrapper->residueHead;
+            residueWrapper = modEntryWrapper->residueWrapper;
             while (residueWrapper != NULL) {
                 residue = residueWrapper->residue;
                 if (isSolutionRunner(residue, modulus, k)) {
@@ -204,7 +204,7 @@ bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterato
 
 bool tryBaseCRT(ModEntryWrapper** compositeWrapper, ModEntry modEntry, uint64_t residue, uint64_t k) {
     const uint64_t MODULUS = modEntry.modulus;
-    if isSolution(Runner(residue, MODULUS, k)) {return true;}
+    if (isSolutionRunner(residue, MODULUS, k)) {return true;}
     if (MODULUS > SQRT_DIVBOUND) {return false;}
     if (*compositeWrapper != NULL) {
         ModEntry compositeEntry = (*compositeWrapper)->modEntry;
@@ -220,7 +220,7 @@ tryBaseCRT_appendResidue:
     return false;
 }
 
-bool tryCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k);
+bool checkCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k);
 
 bool crtSmallPowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k) {
     ModEntryWrapper* modEntryIterator = primeWrapper->lastModEntryWrapper;
@@ -231,10 +231,10 @@ bool crtSmallPowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
         iteratedModEntry = modEntryIterator->modEntry;
         if (inputModEntry.modulus * iteratedModEntry.modulus < DIVBOUND) {
             newModEntry = combineCoprimeModEntries(inputModEntry, iteratedModEntry);
-            residueWrapper = modEntryIterator->residueHead;
+            residueWrapper = modEntryIterator->residueWrapper;
             while (residueWrapper != NULL) {
                 newResidue = crtCalc(inputResidue, inputModEntry, residueWrapper->residue, iteratedModEntry, newModEntry);
-                if (tryCRT(primeWrapper->prev, compositeWrapper, newModEntry, newResidue, k)) {return true;}
+                if (checkCRT(primeWrapper->prev, compositeWrapper, newModEntry, newResidue, k)) {return true;}
                 residueWrapper = residueWrapper->prev;
             }
         }
@@ -247,7 +247,7 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
     const ModEntryWrapper primeEntryWrapper = *(primeWrapper->firstModEntryWrapper);
     const ModEntry primeEntry = primeEntryWrapper.modEntry;
     ModEntryWrapper powerEntryWrapper = *(primeWrapper->lastModEntryWrapper);
-    ResidueWrapper* residueWrapper = powerEntryWrapper.residueHead;
+    ResidueWrapper* residueWrapper = powerEntryWrapper.residueWrapper;
     ModEntry powerEntry = increasePrimeModEntryPower(powerEntryWrapper.modEntry, primeEntry);
     ModEntry newModEntry;
     const uint64_t INPUT_MODULUS = inputModEntry.modulus;
@@ -260,17 +260,17 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
         if (freeing) {
             (void)freeResidueWrappers(residueWrapper);
         }
-        residueWrapper = powerEntryWrapper.residueHead;
+        residueWrapper = powerEntryWrapper.residueWrapper;
         while (residueWrapper != NULL) {
             residue = residueWrapper->residue;
             newResidue = crtCalc(residue, powerEntry, inputResidue, inputModEntry, newModEntry);
-            if (tryCRT(primeWrapper, compositeWrapper, newModEntry, newResidue, k)) {
+            if (checkCRT(primeWrapper, compositeWrapper, newModEntry, newResidue, k)) {
                 result = true;
                 break;
             }
             residueWrapper = residueWrapper->prev;
         }
-        residueWrapper = powerEntryWrapper.residueHead;
+        residueWrapper = powerEntryWrapper.residueWrapper;
         powerEntry = increasePrimeModEntryPower(powerEntry, primeEntry);
         powerEntryWrapper = makeModEntryWrapper(powerEntry, &powerEntryWrapper);
         if (result) {break;}
@@ -289,7 +289,7 @@ bool checkCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, Mo
     if (primeWrapper == NULL) {
         return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k);
     }
-    if (tryCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
+    if (checkCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     if (crtSmallPowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
     if (inputModEntry.modulus > SQRT_DIVBOUND) {return false;}
     if (crtLargePowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k)) {return true;}
@@ -310,7 +310,7 @@ bool checkLargeComposites(ModEntryWrapper* compositeWrapper, ModEntry inputModEn
         iteratedModulus = iteratedModEntry.modulus;
         if (iteratedModulus * inputModEntry.modulus < DIVBOUND) {
             newModEntry = combineCoprimeModEntries(inputModEntry, iteratedModEntry);
-            residueWrapper = compositeWrapper->residueHead;
+            residueWrapper = compositeWrapper->residueWrapper;
             while (residueWrapper != NULL) {
                 iteratedResidue = residueWrapper->residue;
                 newResidue = crtCalc(inputResidue, inputModEntry, iteratedResidue, iteratedModEntry, newModEntry);
@@ -332,8 +332,8 @@ bool tryLargePrimes(ModEntryWrapper* compositeWrapper, uint64_t k, primesieve_it
     while ((prime = primesieve_next_prime(primeIterator)) < DIVBOUND) {
         modEntry = primeModEntry(prime);
         modEntryWrapper = makeModEntryWrapper(modEntry, NULL);
-        if (!tryThisPrime(&modEntryWrapper, k)) {continue;}
-        residueWrapper = modEntryWrapper.residueHead;
+        if (!checkThisPrime(&modEntryWrapper, k)) {continue;}
+        residueWrapper = modEntryWrapper.residueWrapper;
         while (residueWrapper != NULL) {
             residue = residueWrapper->residue;
             if (checkLargeComposites(compositeWrapper, modEntry, residue, k)) {
@@ -342,7 +342,7 @@ bool tryLargePrimes(ModEntryWrapper* compositeWrapper, uint64_t k, primesieve_it
             }
             residueWrapper = residueWrapper->prev;
         }
-        freeResidueWrappers(modEntryWrapper.residueHead);
+        freeResidueWrappers(modEntryWrapper.residueWrapper);
         if (result) {break;}
     }
     return result;
