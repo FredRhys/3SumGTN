@@ -50,10 +50,9 @@ bool tryBasic(uint64_t k) {
 
 bool tryBasicMax(uint64_t k) {
 	bool result = false;
-	int64_t negBound = -2 * sqrtl(k);
     int64_t _6k = 6 * k;
     __int128_t dividend = -1;
-	for (int64_t z = -UINT21_MAX; z < UINT21_MAX; z++) {
+	for (int64_t z = -UINT21_MAX; z < UINT21_MAX && !result; z++) {
 		dividend = (__int128_t)z * z * z - z - _6k;
 		if (checkFormulaDividend(dividend, k, z)) {result = true;}
 	}
