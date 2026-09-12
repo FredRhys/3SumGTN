@@ -202,10 +202,10 @@ bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterato
     return checkAllResidues(*primeWrapper, k, sqrtDivbound * sqrtDivbound);
 }
 
-bool tryBaseCRT(ModEntryWrapper** compositeWrapper, ModEntry modEntry, uint64_t residue, uint64_t k,uint64_t divbound) {
+bool tryBaseCRT(ModEntryWrapper** compositeWrapper, ModEntry modEntry, uint64_t residue, uint64_t k,uint64_t sqrtDivbound) {
     const uint64_t MODULUS = modEntry.modulus;
-    if (isSolutionRunner(residue, MODULUS, k, divbound)) {return true;}
-    if (MODULUS > divbound) {return false;}
+    if (isSolutionRunner(residue, MODULUS, k, sqrtDivbound * sqrtDivbound)) {return true;}
+    if (MODULUS > sqrtDivbound) {return false;}
     if (*compositeWrapper != NULL) {
         ModEntry compositeEntry = (*compositeWrapper)->modEntry;
         if (compositeEntry.modulus == MODULUS) {
@@ -289,7 +289,7 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapp
 // Runs Chinese Remainder Theorem to iterate over all available composite moduli.
 bool checkCRT(PrimeWrapper* primeWrapper, ModEntryWrapper** compositeWrapper, ModEntry inputModEntry, uint64_t inputResidue, uint64_t k, uint64_t sqrtDivbound) {
     if (primeWrapper == NULL) {
-        return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound * sqrtDivbound);
+        return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound);
     }
     if (checkCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound)) {return true;}
     if (crtSmallPowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound)) {return true;}
