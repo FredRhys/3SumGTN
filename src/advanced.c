@@ -356,7 +356,7 @@ bool tryAdvanced(uint64_t k, uint64_t sqrtDivbound) {
     PrimeWrapper* primeWrapper = NULL;
     ModEntryWrapper* compositeWrapper = NULL;
     bool result = false;
-    const uint64_t DIVBOUND = sqrtDivbound * sqrtDivbound;
+    uint64_t DIVBOUND = sqrtDivbound * sqrtDivbound;
 
     if (checkSmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapper, sqrtDivbound)) {
         result = true;
