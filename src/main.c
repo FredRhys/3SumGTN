@@ -20,8 +20,8 @@ void mainloop(uint64_t range, uint64_t threads) {
     for (uint64_t i = 0; i <= range; i++) {
         if (tryBasic(i)) {continue;}
         if (tryPreliminary(i)) {continue;}
-        if (tryAdvanced(i)) {continue;}
-        if (tryBasicMax(i)) {continue;}
+        if (tryAdvanced(i, 739)) {continue;} // precomputed sqrtDivbound equivalent with limiting divisor to 21 bits
+        //if (tryBasicMax(i)) {continue;}
         (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
     }
 }
