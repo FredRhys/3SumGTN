@@ -15,28 +15,31 @@ void createResultsTxt() {
     fclose(f);
 }
 
-void mainloop(uint64_t range, uint64_t threads) {
+void mainloop(uint64_t range, uint64_t threads, int64_t maxDivbound) {
     #pragma omp parallel for num_threads(threads)
     for (uint64_t i = 0; i <= range; i++) {
         if (tryBasic(i)) {continue;}
         if (tryPreliminary(i)) {continue;}
-        if (tryAdvanced(i, 739)) {continue;} // precomputed sqrtDivbound equivalent with limiting divisor to 21 bits
-        //if (tryBasicMax(i)) {continue;}
+        for (int64_t j = 100; j <= maxDivbound; j += 100) {
+            if (tryAdvanced(i, j)) {goto mainloop_continue;}
+        }
         (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
+mainloop_continue:
     }
 }
 
 int main(int argc, char** argv) {
-    if (argc != 3) {return -1;}
+    if (argc != 4) {return -1;}
     if (initfactor64("factor64/factor.bin") < 0) {
 		(void)fprintf(stderr, "Cannot read factor data\n");
 		return -1;
 	}
     const uint64_t RANGE = atoll(argv[1]);
     const uint16_t THREADS = atoi(argv[2]);
+    const int64_t MAX_DIVBOUND = atoi(argv[3]);
     (void)createResultsTxt();
     resultsDotTxt = fopen("results.txt", "a");
-    (void)mainloop(RANGE, THREADS);
+    (void)mainloop(RANGE, THREADS, MAX_DIVBOUND);
     fclose(resultsDotTxt);
     return 0;
 }
