@@ -11,6 +11,6 @@
 
 #define UINT42_MAX 0x3FFFFFFFFFF
 
-bool tryAdvanced(uint64_t k, uint64_t sqrtDivbound);
+bool tryAdvanced(uint64_t k, int64_t sqrtDivbound);
 
 #endif
