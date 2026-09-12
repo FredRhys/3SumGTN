@@ -10,9 +10,7 @@
 #include <inttypes.h>
 
 #define UINT42_MAX 0x3FFFFFFFFFF
-#define DIVBOUND 545094
-#define SQRT_DIVBOUND 739
 
-bool tryAdvanced(uint64_t k);
+bool tryAdvanced(uint64_t k, uint64_t sqrtDivbound);
 
 #endif
