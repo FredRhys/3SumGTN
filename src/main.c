@@ -19,7 +19,7 @@ void mainloop(uint64_t range, uint64_t threads) {
     #pragma omp parallel for num_threads(threads)
     for (uint64_t i = 0; i <= range; i++) {
         if (tryBasic(i)) {continue;}
-        //if (tryPreliminary(i)) {continue;}
+        if (tryPreliminary(i)) {continue;}
         if (tryAdvanced(i)) {continue;}
         (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
     }
