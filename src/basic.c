@@ -8,7 +8,8 @@ bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 		return false;
 	}
 	if (absDividend == 1) {
-		return checkFormulaResults(1, 1, 3, k, z);
+		libdivide_s64_t threeDivisor = libdivide_s64_gen(3);
+		return checkFormulaResults(1, 1, &threeDivisor, k, z);
 	}
 	primeFactorCount = factor64(primeFactors, exponents, absDividend);
 	libdivide_s64_t tripleDivisor;
@@ -26,7 +27,7 @@ bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 				nextDivisor = base * divisors[multiplicandIndex];
 				tripleDivisor = libdivide_s64_gen(3 * nextDivisor);
 				//if (nextDivisor > DIVBOUND) {continue;}
-				if (checkFormulaResults(dividend, nextDivisor, , k, z)) {return true;}
+				if (checkFormulaResults(dividend, nextDivisor, &tripleDivisor, k, z)) {return true;}
 				if (lastDivisorIndex == DIVISOR_LIM - 1) {
 					//printf("Filled divisiors.\n");
 					return false;

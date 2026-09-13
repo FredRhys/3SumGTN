@@ -3,10 +3,10 @@ LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
 		 -O3\
- 		 -pedantic
-#  		 -g\
-#   	 -fsanitize=address\
-#  		 -fsanitize=undefined
+ 		 -pedantic\
+ 		 -g\
+  	 	 -fsanitize=address\
+ 		 -fsanitize=undefined
 
 buildfiles := build\
  build/main.o\

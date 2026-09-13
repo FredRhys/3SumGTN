@@ -3,6 +3,7 @@
 #include <primesieve.h>
 #include "poly.h"
 #include "../libmontmul/montmul.h" // this is included by poly.h
+#include "../libdivide/libdivide.h"
 #include "wrappers.h"
 #include "formula.h"
 #include <stdbool.h>
@@ -14,6 +15,7 @@
 #define DIVBOUND 545094
 #define SQRT_DIVBOUND 739
 
+typedef struct libdivide_s64_t libdivide_s64_t;
 bool tryAdvanced(uint64_t k);
 
 #endif
