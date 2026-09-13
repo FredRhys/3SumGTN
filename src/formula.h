@@ -6,6 +6,7 @@
 #include <math.h>
 #include <inttypes.h>
 #include <stdbit.h>
+#include "../libdivide/libdivide.h"
 
 // global variables
 extern FILE* resultsDotTxt;
