@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "formula.h"
+#include "../libdivide/libdivide.h"
 
 // functions from factor64
 int initfactor64(const char*);
