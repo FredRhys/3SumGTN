@@ -19,7 +19,7 @@ void mainloop(uint64_t range, uint64_t threads, int64_t maxDivbound) {
     #pragma omp parallel for num_threads(threads)
     for (uint64_t i = 0; i <= range; i++) {
         if (tryBasic(i)) {continue;}
-        for (int64_t j = 500; j <= maxDivbound; j += 500) {
+        for (int64_t j = 1000; j <= maxDivbound; j += 1000) {
             if (tryAdvanced(i, j)) {goto mainloop_continue;}
         }
         if (tryPreliminary(i)) {continue;}
