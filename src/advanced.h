@@ -12,11 +12,7 @@
 
 #define UINT42_MAX 0x3FFFFFFFFFF
 
-<<<<<<< HEAD
-bool tryAdvanced(uint64_t k, int64_t sqrtDivbound);
-=======
 typedef struct libdivide_s64_t libdivide_s64_t;
 bool tryAdvanced(uint64_t k);
->>>>>>> dev
 
 #endif
