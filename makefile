@@ -5,7 +5,7 @@ CFLAGS = -std=c23\
 		 -O3\
  		 -pedantic
 #  		 -g\
-#   	 -fsanitize=address\
+#   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
 
 buildfiles := build\
