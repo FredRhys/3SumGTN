@@ -61,7 +61,7 @@ run: run.sh
 	bash run.sh
 
 run.sh:
-	echo "build/main 1000000 12 10000" > run.sh
+	echo "build/main 1 100000 12 1000 1000" > run.sh
 	chmod a+x run.sh
 
 default: build/main
