@@ -6,20 +6,20 @@
 #include "../libmontmul/montmul.h"
 
 typedef struct ResidueWrapper {
-    uint64_t residue;
-    struct ResidueWrapper* prev; // added in incidence order
+  uint64_t residue;
+  struct ResidueWrapper* prev; // added in incidence order
 }ResidueWrapper;
 
 typedef struct ModEntryWrapper {
-    ModEntry modEntry;
-    ResidueWrapper* residueWrapper;
-    struct ModEntryWrapper* prev; // the ModEntryWrapper head should be that with the greatest modulus.
+  ModEntry modEntry;
+  ResidueWrapper* residueWrapper;
+  struct ModEntryWrapper* prev; // the ModEntryWrapper head should be that with the greatest modulus.
 }ModEntryWrapper;
 
 typedef struct PrimeWrapper {
-    ModEntryWrapper* firstModEntryWrapper;
-    ModEntryWrapper* lastModEntryWrapper;
-    struct PrimeWrapper* prev; // the PrimeWrapper head should be that with the greatest modulus.
+  ModEntryWrapper* firstModEntryWrapper;
+  ModEntryWrapper* lastModEntryWrapper;
+  struct PrimeWrapper* prev; // the PrimeWrapper head should be that with the greatest modulus.
 }PrimeWrapper;
 
 ResidueWrapper makeResidueWrapper(uint64_t residue, ResidueWrapper* prev);

@@ -5,10 +5,19 @@ CFLAGS = -std=c23\
 		 -O3\
  		 -pedantic
 #  		 -g\
-#   	 -fsanitize=address\
+#   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
 
-buildfiles := build build/main.o build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
+buildfiles := build\
+ build/main.o\
+ build/basic.o\
+ factor64/factor64.o\
+ build/advanced.o\
+ build/poly.o\
+ build/montmul.o\
+ build/wrappers.o\
+ build/formula.o\
+ build/preliminary.o
 
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
@@ -24,6 +33,9 @@ build/basic.o: src/basic.c factor64/factor64.o
 
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
+
+build/preliminary.o: src/preliminary.c build/formula.o
+	$(LD) $(CFLAGS) -c src/preliminary.c -o build/preliminary.o
 
 build/advanced.o: src/advanced.c build/poly.o build/montmul.o build/wrappers.o build/formula.o
 	$(LD) $(CFLAGS) -c src/advanced.c -o build/advanced.o
@@ -49,7 +61,7 @@ run: run.sh
 	bash run.sh
 
 run.sh:
-	echo "build/main 1000000 12" > run.sh
+	echo "build/main 1 100000 12 1000 1000" > run.sh
 	chmod a+x run.sh
 
 default: build/main
