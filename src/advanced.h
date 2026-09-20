@@ -10,12 +10,9 @@
 #include <stdlib.h> // for malloc
 #include <inttypes.h>
 
-#define UINT21_MAX 0x1FFFFF
 #define UINT42_MAX 0x3FFFFFFFFFF
-#define DIVBOUND 545094
-#define SQRT_DIVBOUND 739
 
 typedef struct libdivide_s64_t libdivide_s64_t;
-bool tryAdvanced(uint64_t k);
+bool tryAdvanced(uint64_t k, int64_t sqrtDivbound);
 
 #endif

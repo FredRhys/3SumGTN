@@ -6,9 +6,9 @@
 #include <stdbit.h>
 
 typedef struct Poly{
-    uint64_t deg2;
-    uint64_t deg1;
-    uint64_t deg0;
+  uint64_t deg2;
+  uint64_t deg1;
+  uint64_t deg0;
 }Poly;
 
 Poly makePoly(uint64_t deg2, uint64_t deg1, uint64_t deg0);
