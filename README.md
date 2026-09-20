@@ -13,13 +13,16 @@ For a full explanation, see [my thesis](https://drive.google.com/file/d/1LHM9BBN
 Currently, only the `basic` algorithm is implemented. The program tries to find a solution for every $k$ from 1 to 1,000,000, and outputs how many integers it fails on.
 
 ## Credits
-Credit to AR Booker for the original [```factor64```](https://github.com/arbooker/factor64). [My fork](https://github.com/FredRhys/factor64) was made only to provide a ```.gitignore```. Credit also to him for being my supervisor during the original project. All other code is my own.
+Credit to AR Booker for the original [```factor64```](https://github.com/arbooker/factor64) and to all the contributors of RidiculousFish's [```libdivide```](https://github.com/ridiculousfish/libdivide). All other code is my own.
 
 ## Technical Aspects
 This program has only been desinged to run on Linux. To run, clone this repo with ```git clone --recurse-submodules https://github.com/FredRhys/3SumGTN```, then run ```make``` to compile.
 
-Running ```build/main RANGE THREADS``` will perform the search from 1 to ```RANGE``` using ```THREADS``` threads. For clarity, I used ```build/main 1000000 12``` for testing.
-Alternatively, I added the ```make run``` rule, which creates and then runs a default ```run.sh``` file. Creating your own in the above format will run the command on your values every time you run ```make run```.
+You are suggested to take advantage of ```run.sh``` and call it using ```make run```. A default version will be created by running ```make run.sh```. Configure it by adjusting:
+
+    ```build/main RANGE_MIN RANGE_MAX NUM_THREADS DIVISOR_MIN DIVISOR_MAX```.
+
+The program will iterate over every *k* from ```RANGE_MIN``` to ```RANGE_MAX```, using the specified number of threads, and call the basic algorithm to try and solve for it. If this fails, then it repeatedly calls the advanced algorithm, doubling ```DIVISOR_MIN``` until it exceeds ```DIVISOR_MAX```. Large values for ```DIVISOR_MIN``` and ```DIVISOR_MAX``` will significantly increase runtime but may be necessary to find solutions for some values of ```k```.
 
 [CodeCogs](https://editor.codecogs.com/) was used for Latex rendering in ```README.md```.
 
@@ -34,3 +37,4 @@ Failures below 100,000:
     advanced small primes: 402      (0.402%)
     advanced small composites: 31   (0.031%)
     advanced large primes: 12       (0.012%)
+    
