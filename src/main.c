@@ -23,7 +23,7 @@ void mainloop(uint64_t min, uint64_t max, uint64_t threads, int64_t minDivbound,
     for (int64_t j = minDivbound; j <= maxDivbound; j *= 2) {
       if (tryAdvanced(i, j)) {goto mainloop_continue;}
     }
-    //if (tryPreliminary(i)) {continue;}
+    if (tryPreliminary(i)) {continue;}
     (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
 mainloop_continue:
   }
