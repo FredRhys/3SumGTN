@@ -16,15 +16,16 @@ void createResultsTxt() {
 }
 
 void mainloop(uint64_t min, uint64_t max, uint64_t threads, int64_t minDivbound, int64_t maxDivbound) {
-  //uint64_t toughs[9] = {64507, 28397, 80502, 68063, 44293, 91163, 72682, 99377, 72717};
+  uint64_t toughs[9] = {64507, 28397, 80502, 68063, 44293, 91163, 72682, 99377, 72717};
   #pragma omp parallel for num_threads(threads)
-  for (uint64_t i = min; i <= max; i++) {
-    if (tryBasic(i)) {continue;}
-    for (int64_t j = minDivbound; j <= maxDivbound; j *= 2) {
-      if (tryAdvanced(i, j)) {goto mainloop_continue;}
+  for (uint8_t i = 0; i < 9; i++) {
+    const uint64_t TOUGH = toughs[i];
+    for (int64_t j = minDivbound; j <= maxDivbound; j += minDivbound) {
+      if (tryAdvanced(TOUGH, j)) {
+        goto mainloop_continue;
+      }
     }
-    if (tryPreliminary(i)) {continue;}
-    (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
+    (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", TOUGH);
 mainloop_continue:
   }
 }
