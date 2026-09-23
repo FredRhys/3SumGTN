@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <stdbit.h>
 #include "../libdivide/libdivide.h"
+#include "isQr.h"
 
 #define UINT21_MAX 0x1FFFFF
 

@@ -17,7 +17,8 @@ buildfiles := build\
  build/montmul.o\
  build/wrappers.o\
  build/formula.o\
- build/preliminary.o
+ build/preliminary.o\
+ build/isQr.o
 
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
@@ -49,8 +50,11 @@ build/wrappers.o: src/wrappers.c build/montmul.o
 build/montmul.o: libmontmul/montmul.c
 	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/montmul.o
 
-build/formula.o: src/formula.c
+build/formula.o: src/formula.c build/isQr.o
 	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
+
+build/isQr.o: src/isQr.c
+	$(LD) $(CFLAGS) -c src/isQr.c -o build/isQr.o
 
 .PHONY: clean
 clean:
