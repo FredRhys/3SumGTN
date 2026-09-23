@@ -18,11 +18,8 @@ buildfiles := build\
  build/wrappers.o\
  build/formula.o\
  build/preliminary.o\
-<<<<<<< HEAD
- build/isQr.o
-=======
+ build/isQr.o\
  build/advancedRunner.o
->>>>>>> AdvancedRunner
 
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
