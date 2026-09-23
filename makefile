@@ -3,8 +3,8 @@ LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
 		 -O3\
- 		 -pedantic
-#  		 -g\
+ 		 -pedantic\
+  		 -g
 #   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
 

@@ -145,11 +145,14 @@ bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModEntryWrapper** r
   return true;
 }
 
+static inline bool isAbsLessThan(int64_t operand, int64_t boundary) {
+  return operand > -boundary && operand < boundary;
+}
+
 static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SIGN, int64_t divbound) {
   const int64_t INCREMENT = SIGN * modulus;
   libdivide_s64_t tripleDivisor = libdivide_s64_gen(3 * modulus);
-  for (int64_t z = residue; (SIGN) * z < divbound; z += INCREMENT) {
-    if ((SIGN) * z > UINT42_MAX) {break;}
+  for (int64_t z = residue; isAbsLessThan(z, divbound) && isAbsLessThan(z, UINT42_MAX); z += INCREMENT) {
     __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
     if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {
       return true;

@@ -53,8 +53,9 @@ bool isQrMod13(uint64_t operand) {
 }
 
 bool isQrModSmallPrimes(uint64_t operand) {
-  return isQrMod5(operand)
-    && isQrMod7(operand)
-    && isQrMod11(operand)
-    && isQrMod13(operand);
+  if (!isQrMod5(operand)) {return false;}
+  if (!isQrMod7(operand)) {return false;}
+  if (!isQrMod11(operand)) {return false;}
+  if (!isQrMod13(operand)) {return false;}
+  return true;
 }
