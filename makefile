@@ -26,7 +26,7 @@ build/main: $(buildfiles)
 build: 
 	mkdir build
 
-build/main.o: src/main.c build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
+build/main.o: src/main.c build/basic.o factor64/factor64.o build/advancedRunner.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
 	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
 build/basic.o: src/basic.c factor64/factor64.o
@@ -53,7 +53,7 @@ build/montmul.o: libmontmul/montmul.c
 build/formula.o: src/formula.c
 	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
 
-build/advancedRunner.o: src/advancedRunner.c
+build/advancedRunner.o: src/advancedRunner.c build/advanced.o
 	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
 
 .PHONY: clean
