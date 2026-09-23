@@ -18,7 +18,11 @@ buildfiles := build\
  build/wrappers.o\
  build/formula.o\
  build/preliminary.o\
+<<<<<<< HEAD
  build/isQr.o
+=======
+ build/advancedRunner.o
+>>>>>>> AdvancedRunner
 
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
@@ -26,7 +30,7 @@ build/main: $(buildfiles)
 build: 
 	mkdir build
 
-build/main.o: src/main.c build/basic.o factor64/factor64.o build/advanced.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
+build/main.o: src/main.c build/basic.o factor64/factor64.o build/advancedRunner.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
 	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
 build/basic.o: src/basic.c factor64/factor64.o
@@ -55,6 +59,9 @@ build/formula.o: src/formula.c build/isQr.o
 
 build/isQr.o: src/isQr.c
 	$(LD) $(CFLAGS) -c src/isQr.c -o build/isQr.o
+	
+build/advancedRunner.o: src/advancedRunner.c build/advanced.o
+	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
 
 .PHONY: clean
 clean:
