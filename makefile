@@ -17,7 +17,8 @@ buildfiles := build\
  build/montmul.o\
  build/wrappers.o\
  build/formula.o\
- build/preliminary.o
+ build/preliminary.o\
+ build/advancedRunner.o
 
 build/main: $(buildfiles)
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
@@ -51,6 +52,9 @@ build/montmul.o: libmontmul/montmul.c
 
 build/formula.o: src/formula.c
 	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
+
+build/advancedRunner.o: src/advancedRunner.c
+	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
 
 .PHONY: clean
 clean:
