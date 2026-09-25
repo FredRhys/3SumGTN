@@ -151,7 +151,7 @@ static inline bool isAbsLessThan(int64_t operand, int64_t boundary) {
 
 static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SIGN, int64_t divbound) {
   const int64_t INCREMENT = SIGN * modulus;
-  libdivide_s64_t tripleDivisor = libdivide_s64_gen(3 * modulus);
+  libdivide_u64_t tripleDivisor = libdivide_u64_gen(3 * modulus);
   for (int64_t z = residue; isAbsLessThan(z, divbound) && isAbsLessThan(z, UINT42_MAX); z += INCREMENT) {
     __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
     if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {

@@ -1,6 +1,7 @@
 #include "basic.h"
 
 bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
+	libdivide_u64_t THREE_DIVISOR = libdivide_u64_gen(3);
 	int primeFactorCount, exponents[15];
 	uint64_t primeFactors[15];
 	const __uint128_t absDividend = abs128(dividend);
@@ -8,11 +9,10 @@ bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 		return false;
 	}
 	if (absDividend == 1) {
-		libdivide_s64_t threeDivisor = libdivide_s64_gen(3);
-		return checkFormulaResults(1, 1, &threeDivisor, k, z);
+		return checkFormulaResults(1, 1, &THREE_DIVISOR, k, z);
 	}
 	primeFactorCount = factor64(primeFactors, exponents, absDividend);
-	libdivide_s64_t tripleDivisor;
+	libdivide_u64_t tripleDivisor;
 	uint64_t divisors[DIVISOR_LIM], nextDivisor, base, prime;
 	divisors[0] = 1;
 	uint32_t lastDivisorIndex = 0, multiplicandLimIndex;
@@ -25,11 +25,11 @@ bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 			base *= prime;
 			for (uint32_t multiplicandIndex = 0; multiplicandIndex <= multiplicandLimIndex; multiplicandIndex++) {
 				nextDivisor = base * divisors[multiplicandIndex];
-				tripleDivisor = libdivide_s64_gen(3 * nextDivisor);
+				tripleDivisor = libdivide_u64_gen(3 * nextDivisor);
 				//if (nextDivisor > DIVBOUND) {continue;}
 				if (checkFormulaResults(dividend, nextDivisor, &tripleDivisor, k, z)) {return true;}
 				if (lastDivisorIndex == DIVISOR_LIM - 1) {
-					//printf("Filled divisiors.\n");
+					printf("Filled divisiors.\n");
 					return false;
 				}
 				divisors[++lastDivisorIndex] = nextDivisor;

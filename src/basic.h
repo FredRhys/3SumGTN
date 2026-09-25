@@ -5,10 +5,11 @@
 
 #include <stdbool.h>
 #include <inttypes.h>
+#include <stdio.h>
 #include "formula.h"
 #include "../libdivide/libdivide.h"
 
-typedef struct libdivide_s64_t libdivide_s64_t;
+typedef struct libdivide_u64_t libdivide_u64_t;
 
 // functions from factor64
 int initfactor64(const char*);
