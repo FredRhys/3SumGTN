@@ -1,6 +1,6 @@
 #include "isQr.h"
 
-bool isQrMod5(uint64_t operand) {
+bool isQrMod5(__uint128_t operand) {
   switch (operand % 5) {
     case 0:
     case 1:
@@ -11,7 +11,7 @@ bool isQrMod5(uint64_t operand) {
   }
 }
 
-bool isQrMod7(uint64_t operand) {
+bool isQrMod7(__uint128_t operand) {
   switch (operand % 7) {
     case 0:
     case 1:
@@ -23,7 +23,7 @@ bool isQrMod7(uint64_t operand) {
   }
 }
 
-bool isQrMod11(uint64_t operand) {
+bool isQrMod11(__uint128_t operand) {
   switch (operand % 11) {
     case 0:
     case 1:
@@ -37,7 +37,7 @@ bool isQrMod11(uint64_t operand) {
   }
 }
 
-bool isQrMod13(uint64_t operand) {
+bool isQrMod13(__uint128_t operand) {
   switch (operand % 13) {
     case 0:
     case 1:
@@ -52,7 +52,7 @@ bool isQrMod13(uint64_t operand) {
   }
 }
 
-bool isQrModSmallPrimes(uint64_t operand) {
+bool isQrModSmallPrimes(__uint128_t operand) {
   if (!isQrMod5(operand)) {return false;}
   if (!isQrMod7(operand)) {return false;}
   if (!isQrMod11(operand)) {return false;}

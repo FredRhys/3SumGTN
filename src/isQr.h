@@ -4,6 +4,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-bool isQrModSmallPrimes(uint64_t operand);
+bool isQrModSmallPrimes(__uint128_t operand);
 
 #endif
