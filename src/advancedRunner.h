@@ -5,6 +5,6 @@
 #include <inttypes.h>
 
 #include "advanced.h"
-bool runAdvanced(uint64_t k, int64_t minDivbound, int64_t maxDivbound);
+bool runAdvanced(uint64_t k, int64_t minBound, int64_t maxBound);
 
 #endif

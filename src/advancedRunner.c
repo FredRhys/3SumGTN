@@ -1,10 +1,10 @@
 #include "advancedRunner.h"
 
-bool runAdvanced(uint64_t k, int64_t minDivbound, int64_t maxDivbound) {
-  int64_t oldDivbound = 0;
-  for (int64_t i = minDivbound; i <= maxDivbound; i += minDivbound) {
-    if (tryAdvanced(k, i, oldDivbound)) {return true;}
-    oldDivbound = i * i;
+bool runAdvanced(uint64_t k, int64_t minBound, int64_t maxBound) {
+  int64_t oldBound = 0;
+  for (int64_t i = minBound; i <= maxBound; i += minBound) {
+    if (tryAdvanced(k, i, oldBound)) {return true;}
+    oldBound = i;
   }
   return false;
 }
