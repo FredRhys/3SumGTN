@@ -69,7 +69,7 @@ run: run.sh
 	bash run.sh
 
 run.sh:
-	echo "#!/bin/bashbuild/main 1 100000 4 40000 4000000" > run.sh
+	echo "build/main 1 100000 4 40000 4000000" > run.sh
 	chmod a+x run.sh
 
 default: build/main
