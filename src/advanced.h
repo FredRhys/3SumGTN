@@ -13,6 +13,6 @@
 #define UINT42_MAX 0x3FFFFFFFFFF
 
 typedef struct libdivide_u64_t libdivide_u64_t;
-bool tryAdvanced(uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound);
+bool tryAdvanced(uint64_t k, int64_t bound, int64_t divbound, int64_t oldBound, int64_t oldDivbound);
 
 #endif

@@ -6,10 +6,11 @@ static bool isSolution(int64_t x,  int64_t y, int64_t radicand, uint64_t k) {
   return true;
 }
 
-bool tryPreliminary(uint64_t k) {
+bool tryPreliminary(uint64_t k, int64_t bound, int64_t oldBound) {
   const uint64_t _6k = 6 * k;
   int64_t x, radicand;
-  for (int64_t y = -2 * sqrtl(k); y > -UINT21_MAX; y--) {
+  for (int64_t y = -2 * sqrtl(k); y > -bound; y--) {
+    if (y > -oldBound) {continue;}
     radicand = _6k + 2 * y * (1 - y * y);
     x = cbrtl(radicand);
     if (isSolution(x, y, radicand, k)) {return true;}

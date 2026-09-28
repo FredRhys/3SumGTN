@@ -3,8 +3,9 @@
 
 #include <stdbool.h>
 #include <inttypes.h>
-
 #include "advanced.h"
+#include "preliminary.h"
+
 bool runAdvanced(uint64_t k, int64_t minBound, int64_t maxBound);
 
 #endif

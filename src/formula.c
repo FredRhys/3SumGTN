@@ -58,12 +58,12 @@ void fprintfResults(uint64_t x, uint64_t y, uint64_t z, uint64_t k) {
 	(void)fprintf(resultsDotTxt, "%ld : %ld / %ld / %ld\n", k, x, y, z);
 }
 
-bool checkFormulaResults(__int128_t dividend, uint64_t divisor, libdivide_u64_t* tripleDivisor, uint64_t k, int64_t z) {
-	__int128_t disc = 4 * (divisor+abs128(dividend)) - (__int128_t)divisor * divisor * divisor;
+bool checkFormulaResults(__int128_t dividand, uint64_t divisor, libdivide_u64_t* tripleDivisor, uint64_t k, int64_t z) {
+	__int128_t disc = 4 * (divisor+abs128(dividand)) - (__int128_t)divisor * divisor * divisor;
 	if (disc < 0) {return false;}
 	const uint64_t DIVISOR_TIMES_3 = divisor * 3;
 	if (!isQrModSmallPrimes(disc * DIVISOR_TIMES_3)) {return false;}
-	int64_t sqrtand = libdivide_u64_do(disc, tripleDivisor);
+	const int64_t sqrtand = disc <= UINT64_MAX ? libdivide_u64_do(disc, tripleDivisor) : disc / DIVISOR_TIMES_3;
 	if (sqrtand * DIVISOR_TIMES_3 != disc) {return false;}
 	if ((divisor & 0b1) != (sqrtand & 0b1)) {return false;}
 	uint64_t formulaSqrt;
@@ -71,7 +71,7 @@ bool checkFormulaResults(__int128_t dividend, uint64_t divisor, libdivide_u64_t*
 
 	int64_t x = (divisor+formulaSqrt)/2;
 	int64_t y = ((int64_t)divisor - (int64_t)formulaSqrt)/2;
-	if (dividend > 0) {
+	if (dividand > 0) {
 		x = -x;
 		y = -y;
 	}
