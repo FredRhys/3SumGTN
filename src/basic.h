@@ -1,7 +1,7 @@
 #ifndef BASIC_H
 
 #define BASIC_H
-#define DIVISOR_LIM 1000
+#define DIVISOR_LIM 10000
 
 #include <stdbool.h>
 #include <inttypes.h>
