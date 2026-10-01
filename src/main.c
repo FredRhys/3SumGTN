@@ -1,6 +1,5 @@
 // Includes
 #include "basic.h"
-#include "preliminary.h"
 #include "advancedRunner.h"
 #include <omp.h>
 #include <stdlib.h> // for atoll
@@ -21,7 +20,6 @@ void mainloop(uint64_t min, uint64_t max, uint64_t threads, int64_t minDivbound,
   for (uint64_t i = min; i <= max; i++) {
     if (tryBasic(i)) {continue;}
     if (runAdvanced(i, minDivbound, maxDivbound)) {continue;}
-    if (tryPreliminary(i)) {continue;}
     (void)fprintf(resultsDotTxt, "Fail: %"PRIu64"\n", i);
   }
 }

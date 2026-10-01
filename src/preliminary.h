@@ -9,6 +9,6 @@
 
 extern FILE* resultsDotTxt;
 
-bool tryPreliminary(uint64_t k);
+bool tryPreliminary(uint64_t k, int64_t bound, int64_t oldBound);
 
 #endif
