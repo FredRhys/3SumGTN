@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
   const uint64_t MIN = atoll(argv[1]);
   const uint64_t MAX = atoll(argv[2]);
   const uint16_t THREADS = atoi(argv[3]);
-  const int64_t MIN_DIVBOUND = atoll(argv[4]);
-  const int64_t MAX_DIVBOUND = atoll(argv[5]);
+  const uint8_t MIN_DIVBOUND = atoll(argv[4]);
+  const uint8_t MAX_DIVBOUND = atoll(argv[5]);
   (void)createResultsTxt();
   resultsDotTxt = fopen("results.txt", "a");
   (void)mainloop(MIN, MAX, THREADS, MIN_DIVBOUND, MAX_DIVBOUND);

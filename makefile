@@ -3,8 +3,8 @@ LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
 		 -O3\
- 		 -pedantic
-#   		 -g
+ 		 -pedantic\
+   		 -g
 #   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
 
@@ -69,7 +69,7 @@ run: run.sh
 	bash run.sh
 
 run.sh:
-	echo "build/main 1 100000 4 40000 4000000" > run.sh
+	echo "build/main 1 100000 4 21 30" > run.sh
 	chmod a+x run.sh
 
 default: build/main

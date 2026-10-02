@@ -1,16 +1,17 @@
 #include "advancedRunner.h"
 
-bool runAdvanced(uint64_t k, int64_t minBound, int64_t maxBound) {
+bool runAdvanced(uint64_t k, int64_t minExp, int64_t maxExp) {
   const float ALPHA = 0.2599210498948734;
-  int64_t divbound;
+  int64_t bound, divbound;
   int64_t oldBound = 0;
   int64_t oldDivbound = 0;
 
-  for (int64_t i = minBound; i <= maxBound; i *= 2) {
+  for (int64_t i = minExp; i <= maxExp; i++) {
+    bound = (1LL << i) - 1;
     divbound = ALPHA * i;
-    if (tryAdvanced(k, i, divbound, oldBound, oldDivbound)) {return true;}
+    if (tryAdvanced(k, bound, divbound, oldBound, oldDivbound)) {return true;}
     if (tryPreliminary(k, i, oldBound));
-    oldBound = i;
+    oldBound = bound;
     oldDivbound = divbound;
   }
   return false;
