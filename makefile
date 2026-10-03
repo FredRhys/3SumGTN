@@ -18,7 +18,6 @@ buildfiles := build\
  build/wrappers.o\
  build/formula.o\
  build/preliminary.o\
- build/isQr.o\
  build/advancedRunner.o
 
 build/main: $(buildfiles)
@@ -51,11 +50,8 @@ build/wrappers.o: src/wrappers.c build/montmul.o
 build/montmul.o: libmontmul/montmul.c
 	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/montmul.o
 
-build/formula.o: src/formula.c build/isQr.o
+build/formula.o: src/formula.c
 	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
-
-build/isQr.o: src/isQr.c
-	$(LD) $(CFLAGS) -c src/isQr.c -o build/isQr.o
 	
 build/advancedRunner.o: src/advancedRunner.c build/advanced.o
 	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
