@@ -212,15 +212,20 @@ bool tryBaseCRT(ModEntryWrapper** compositeWrapper, ModEntry modEntry, uint64_t 
   if (isSolutionRunner(residue, MODULUS, k, oldDivbound, bound, oldBound)) {return true;}
   if (MODULUS > sqrtDivbound) {return false;}
   if (*compositeWrapper != NULL) {
-    ModEntry compositeEntry = (*compositeWrapper)->modEntry;
-    if (compositeEntry.modulus == MODULUS) {
-      goto tryBaseCRT_appendResidue;
+    ModEntryWrapper* modEntryWrapperIterator = *compositeWrapper;
+    while (modEntryWrapperIterator != NULL) {
+      const ModEntry compositeEntry = modEntryWrapperIterator->modEntry;
+      if (compositeEntry.modulus == MODULUS) {
+        appendResidue(modEntryWrapperIterator, residue);
+        return false;
+      }
+      modEntryWrapperIterator = modEntryWrapperIterator->prev;
     }
   }
+  // Makes a new mod entry wrapperwrapper
   ModEntryWrapper* OLD = *compositeWrapper;
   *compositeWrapper = malloc(sizeof(ModEntryWrapper));
   **compositeWrapper = makeModEntryWrapper(modEntry, OLD);
-tryBaseCRT_appendResidue:
   appendResidue(*compositeWrapper, residue);
   return false;
 }
@@ -372,8 +377,8 @@ bool tryAdvanced(uint64_t k, int64_t bound, int64_t divbound, int64_t oldBound, 
   else if (tryLargePrimes(compositeWrapper, k, &primeIterator, divbound, oldDivbound, bound, oldBound)) {
     result = true;
   }
-  (void)freeModEntryWrappers(compositeWrapper);
   (void)freePrimeWrappers(primeWrapper);
+  (void)freeModEntryWrappers(compositeWrapper);
   (void)primesieve_free_iterator(&primeIterator);
   return result;
 }
