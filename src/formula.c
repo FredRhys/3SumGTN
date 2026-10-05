@@ -59,6 +59,18 @@ void fprintfResults(uint64_t x, uint64_t y, uint64_t z, uint64_t k) {
 }
 
 bool checkFormulaResults(__int128_t dividand, uint64_t divisor, libdivide_u64_t* tripleDivisor, uint64_t k, int64_t z) {
+	/*
+	const __int128_t TEST = divisor + abs128(dividand);
+	const __int128_t DIVISOR_CUBED = (__int128_t)divisor * divisor * divisor;
+	// add this to catch some cases before we bit-shift
+	if (TEST < DIVISOR_CUBED / 4) {
+		return false;
+	}
+	__int128_t disc = 4 * TEST - DIVISOR_CUBED;
+	if (disc < 0) {
+		return false;
+	}
+	*/
 	__int128_t disc = 4 * (divisor+abs128(dividand)) - (__int128_t)divisor * divisor * divisor;
 	if (disc < 0) {return false;}
 	const uint64_t DIVISOR_TIMES_3 = divisor * 3;

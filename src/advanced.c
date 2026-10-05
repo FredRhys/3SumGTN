@@ -151,9 +151,18 @@ static inline bool isAbsLessThan(int64_t operand, int64_t boundary) {
 
 static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SIGN, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
   const int64_t INCREMENT = SIGN * modulus;
+  const bool IS_MODULUS_SMALL = modulus < oldDivbound;
   libdivide_u64_t tripleDivisor = libdivide_u64_gen(3 * modulus);
   for (int64_t z = residue; isAbsLessThan(z, bound); z += INCREMENT) {
-    if (modulus < oldDivbound && isAbsLessThan(z, oldBound)) {continue;}
+    if (IS_MODULUS_SMALL && isAbsLessThan(z, oldBound)) {
+      /*
+      VERY STRANGE BUG
+      this will not solve 10873 : -426 / 411 / 209 when
+      the minBound = maxBound = 2^10,
+      but is fine with minBound = 2^9 and maxBound = 2^11
+      */
+      continue;
+    }
     __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
     if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {
       return true;
@@ -204,7 +213,7 @@ bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterato
     *primeWrapper = malloc(sizeof(PrimeWrapper));
     **primeWrapper = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
   }
-  return checkAllResidues(*primeWrapper, k, bound, oldDivbound, oldBound);
+  return checkAllResidues(*primeWrapper, k, oldDivbound, bound, oldBound);
 }
 
 bool tryBaseCRT(ModEntryWrapper** compositeWrapper, ModEntry modEntry, uint64_t residue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {

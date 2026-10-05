@@ -10,7 +10,7 @@ bool runAdvanced(uint64_t k, int64_t minExp, int64_t maxExp) {
     bound = (1LL << i);
     divbound = ALPHA * bound;
     if (tryAdvanced(k, bound, divbound, oldBound, oldDivbound)) {return true;}
-    if (tryPreliminary(k, i, oldBound));
+    if (tryPreliminary(k, i, oldBound)) {return true;}
     oldBound = bound;
     oldDivbound = divbound;
   }
