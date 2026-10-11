@@ -26,34 +26,34 @@ build/main: $(buildfiles)
 build: 
 	mkdir build
 
-build/main.o: src/main.c build/basic.o factor64/factor64.o build/advancedRunner.o build/poly.o build/montmul.o build/wrappers.o build/formula.o
+build/main.o: src/main.c build/basic.o build/advancedRunner.o
 	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
-build/basic.o: src/basic.c factor64/factor64.o
+build/basic.o: src/basic.c src/basic.h factor64/factor64.o
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
 
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
 
-build/preliminary.o: src/preliminary.c build/formula.o
+build/preliminary.o: src/preliminary.c src/preliminary.h build/formula.o
 	$(LD) $(CFLAGS) -c src/preliminary.c -o build/preliminary.o
 
-build/advanced.o: src/advanced.c build/poly.o build/montmul.o build/wrappers.o build/formula.o
+build/advanced.o: src/advanced.c src/advanced.h build/poly.o build/montmul.o build/wrappers.o build/formula.o
 	$(LD) $(CFLAGS) -c src/advanced.c -o build/advanced.o
 
-build/poly.o: src/poly.c build/montmul.o
+build/poly.o: src/poly.c src/poly.h build/montmul.o
 	$(LD) $(CFLAGS) -c src/poly.c -o build/poly.o
 
-build/wrappers.o: src/wrappers.c build/montmul.o
+build/wrappers.o: src/wrappers.c src/wrappers.h build/montmul.o
 	$(LD) $(CFLAGS) -c src/wrappers.c -o build/wrappers.o
 
-build/montmul.o: libmontmul/montmul.c
+build/montmul.o: libmontmul/montmul.c libmontmul/montmul.h
 	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/montmul.o
 
-build/formula.o: src/formula.c
+build/formula.o: src/formula.c src/formula.h src/isQr.h
 	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
 	
-build/advancedRunner.o: src/advancedRunner.c build/advanced.o
+build/advancedRunner.o: src/advancedRunner.c src/advancedRunner.h build/advanced.o
 	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
 
 .PHONY: clean
