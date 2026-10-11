@@ -1,6 +1,6 @@
 #ifndef POLY_H
-
 #define POLY_H
+
 #include "../libmontmul/montmul.h"
 #include <inttypes.h>
 #include <stdbit.h>
