@@ -1,9 +1,9 @@
 [submodule "libmontmul"]
 	path = libmontmul
 	url = https://github.com/FredRhys/libmontmul
-[submodule "factor64"]
-	path = factor64
-	url = https://github.com/FredRhys/factor64
 [submodule "libdivide"]
 	path = libdivide
 	url = https://github.com/ridiculousfish/libdivide
+[submodule "factor64"]
+	path = factor64
+	url = https://github.com/arbooker/factor64
