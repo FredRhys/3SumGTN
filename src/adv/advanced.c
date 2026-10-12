@@ -1,32 +1,32 @@
 #include "advanced.h"
 
-bool extractRootsFromQuad(Poly poly, ModulusWrapper* modEntryWrapper) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t PRIME = MOD_ENTRY.modulus;
+bool extractRootsFromQuad(Poly poly, ModulusWrapper* modulusWrapper) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t PRIME = MONTMUL_T.modulus;
   const uint64_t A = poly.deg2, B = poly.deg1, C = poly.deg0;
-  const uint64_t DENOMINATOR = invmod(montmul(2, A, MOD_ENTRY), MOD_ENTRY);
-  const uint64_t DISCRIMINANT = submod(montexp(B, 2, MOD_ENTRY), montmul(4, montmul(A, C, MOD_ENTRY), MOD_ENTRY), PRIME);
-  if (legendre(DISCRIMINANT, MOD_ENTRY) == -1) {return false;}
-  const uint64_t SQRT = sqrtmod(DISCRIMINANT, MOD_ENTRY);
+  const uint64_t DENOMINATOR = invmod(montmul(2, A, MONTMUL_T), MONTMUL_T);
+  const uint64_t DISCRIMINANT = submod(montexp(B, 2, MONTMUL_T), montmul(4, montmul(A, C, MONTMUL_T), MONTMUL_T), PRIME);
+  if (legendre(DISCRIMINANT, MONTMUL_T) == -1) {return false;}
+  const uint64_t SQRT = sqrtmod(DISCRIMINANT, MONTMUL_T);
   const uint64_t NUMERATOR1 = submod(SQRT, B, PRIME);
   const uint64_t NUMERATOR2 = submod(0, B + SQRT, PRIME);
-  const uint64_t ROOT1 = montmul(NUMERATOR1, DENOMINATOR, MOD_ENTRY);
-  appendResidue(modEntryWrapper, ROOT1);
+  const uint64_t ROOT1 = montmul(NUMERATOR1, DENOMINATOR, MONTMUL_T);
+  appendResidue(modulusWrapper, ROOT1);
   if (NUMERATOR1 == NUMERATOR2) {return true;}
-  const uint64_t ROOT2 = montmul(NUMERATOR2, DENOMINATOR, MOD_ENTRY);
-  appendResidue(modEntryWrapper, ROOT2);
+  const uint64_t ROOT2 = montmul(NUMERATOR2, DENOMINATOR, MONTMUL_T);
+  appendResidue(modulusWrapper, ROOT2);
   return true;
 }
 
-bool extractRoots(Poly poly, ModulusWrapper* modEntryWrapper) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t PRIME = MOD_ENTRY.modulus;
+bool extractRoots(Poly poly, ModulusWrapper* modulusWrapper) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t PRIME = MONTMUL_T.modulus;
   switch (degreeOfPoly(poly)) {
     case 2:
-      return extractRootsFromQuad(poly, modEntryWrapper);
+      return extractRootsFromQuad(poly, modulusWrapper);
     case 1:
       uint64_t root = submod(0, poly.deg0, PRIME);
-      appendResidue(modEntryWrapper, root);
+      appendResidue(modulusWrapper, root);
       return true;
     default:
       return false;
@@ -34,87 +34,87 @@ bool extractRoots(Poly poly, ModulusWrapper* modEntryWrapper) {
 
 }
 
-void checkOffsetIsRoot(ModulusWrapper* modEntryWrapper, uint64_t _6k, uint64_t offset, uint8_t degreeSum) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
+void checkOffsetIsRoot(ModulusWrapper* modulusWrapper, uint64_t _6k, uint64_t offset, uint8_t degreeSum) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
   switch (degreeSum) {
     case 2:
-      appendResidue(modEntryWrapper, offset);
+      appendResidue(modulusWrapper, offset);
       break;
     case 0:
-      if (applyMasterPoly(offset, MOD_ENTRY, _6k) != 0) {break;}
-      appendResidue(modEntryWrapper, offset);
+      if (applyMasterPoly(offset, MONTMUL_T, _6k) != 0) {break;}
+      appendResidue(modulusWrapper, offset);
       break;
     default:
       break;
   }
 }
 
-bool extractRootsFromPrime(ModulusWrapper* modEntryWrapper, uint64_t k) {
+bool extractRootsFromPrime(ModulusWrapper* modulusWrapper, uint64_t k) {
   Poly rootPoly;
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t PRIME = MOD_ENTRY.modulus;
-  const uint64_t _6k = montmul(6, k, MOD_ENTRY);
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t PRIME = MONTMUL_T.modulus;
+  const uint64_t _6k = montmul(6, k, MONTMUL_T);
   for (uint64_t offset = 0; offset < PRIME; offset++) {
-    rootPoly = getRootPoly(MOD_ENTRY, _6k, offset);
+    rootPoly = getRootPoly(MONTMUL_T, _6k, offset);
     if (degreeOfPoly(rootPoly) == 0) {continue;}
-    const Poly GCD1 = gcdPoly(rootPoly, MOD_ENTRY, _6k);
+    const Poly GCD1 = gcdPoly(rootPoly, MONTMUL_T, _6k);
     rootPoly.deg0 = submod(rootPoly.deg0, 2, PRIME);
-    const Poly GCD2 = gcdPoly(rootPoly, MOD_ENTRY, _6k);
-    (void)checkOffsetIsRoot(modEntryWrapper, _6k, offset, degreeOfPoly(GCD1) + degreeOfPoly(GCD2));
-    const bool RESULT1 = extractRoots(GCD1, modEntryWrapper);
-    return extractRoots(GCD2, modEntryWrapper) || RESULT1;
+    const Poly GCD2 = gcdPoly(rootPoly, MONTMUL_T, _6k);
+    (void)checkOffsetIsRoot(modulusWrapper, _6k, offset, degreeOfPoly(GCD1) + degreeOfPoly(GCD2));
+    const bool RESULT1 = extractRoots(GCD1, modulusWrapper);
+    return extractRoots(GCD2, modulusWrapper) || RESULT1;
   }
   return false;
 }
 
-bool checkThisPrime(ModulusWrapper* modEntryWrapper, uint64_t k) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t PRIME = MOD_ENTRY.modulus;
+bool checkThisPrime(ModulusWrapper* modulusWrapper, uint64_t k) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t PRIME = MONTMUL_T.modulus;
   switch (PRIME) {
     case 3:
-      appendResidue(modEntryWrapper, 2);
+      appendResidue(modulusWrapper, 2);
       // Employing intentional case fallthrough
     case 2:
-      appendResidue(modEntryWrapper, 1);
-      appendResidue(modEntryWrapper, 0);
+      appendResidue(modulusWrapper, 1);
+      appendResidue(modulusWrapper, 0);
       return true;
     default:
-      return extractRootsFromPrime(modEntryWrapper, k);
+      return extractRootsFromPrime(modulusWrapper, k);
   }  
 }
 
-void extractRootsWithHensels(ModulusWrapper* modEntryWrapper, libmontmul_t primeEntry, uint64_t oldRoot, uint64_t denominator, uint64_t _6k) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t MODULUS = MOD_ENTRY.modulus;
+void extractRootsWithHensels(ModulusWrapper* modulusWrapper, libmontmul_t primeMontmul_t, uint64_t oldRoot, uint64_t denominator, uint64_t _6k) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t MODULUS = MONTMUL_T.modulus;
   const uint64_t NEW_ROOT = submod(oldRoot,
-    montmul(invmod(denominator, primeEntry), applyMasterPoly(oldRoot, MOD_ENTRY, _6k), MOD_ENTRY),
+    montmul(invmod(denominator, primeMontmul_t), applyMasterPoly(oldRoot, MONTMUL_T, _6k), MONTMUL_T),
     MODULUS);
-  appendResidue(modEntryWrapper, NEW_ROOT);
+  appendResidue(modulusWrapper, NEW_ROOT);
 }
 
-void extractRootsWithBruteForce(ModulusWrapper* modEntryWrapper, uint64_t _6k) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t MODULUS = MOD_ENTRY.modulus;
+void extractRootsWithBruteForce(ModulusWrapper* modulusWrapper, uint64_t _6k) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t MODULUS = MONTMUL_T.modulus;
   // TODO can determine number of roots with implemented tools
   for (uint64_t i = 0; i < MODULUS; i++) {
-    if (applyMasterPoly(i, MOD_ENTRY, _6k) != 0) {continue;}
-    appendResidue(modEntryWrapper, i);
+    if (applyMasterPoly(i, MONTMUL_T, _6k) != 0) {continue;}
+    appendResidue(modulusWrapper, i);
   }
 }
 
-void extractRootsFromPower(ModulusWrapper* modEntryWrapper, ResidueWrapper* residueWrapper, libmontmul_t primeEntry, uint64_t k) {
-  const libmontmul_t MOD_ENTRY = modEntryWrapper->modulus;
-  const uint64_t _6k = montmul(6, k, MOD_ENTRY);
+void extractRootsFromPower(ModulusWrapper* modulusWrapper, ResidueWrapper* residueWrapper, libmontmul_t primeMontmul_t, uint64_t k) {
+  const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
+  const uint64_t _6k = montmul(6, k, MONTMUL_T);
   uint64_t residue;
   while (residueWrapper != NULL) {
     residue = residueWrapper->residue;
-    const uint64_t DENOMINATOR = applyMasterPolyDeriv(residue, MOD_ENTRY);
+    const uint64_t DENOMINATOR = applyMasterPolyDeriv(residue, MONTMUL_T);
     //TODO figure out why this doesn't accept modulus of 4.
-    if (DENOMINATOR != 0 && MOD_ENTRY.modulus != 4) {
-      (void)extractRootsWithHensels(modEntryWrapper, primeEntry, residue, DENOMINATOR, _6k);
+    if (DENOMINATOR != 0 && MONTMUL_T.modulus != 4) {
+      (void)extractRootsWithHensels(modulusWrapper, primeMontmul_t, residue, DENOMINATOR, _6k);
     }
     else {
-      (void)extractRootsWithBruteForce(modEntryWrapper, _6k);
+      (void)extractRootsWithBruteForce(modulusWrapper, _6k);
       break;
     }
     residueWrapper = residueWrapper->prev;
@@ -122,8 +122,8 @@ void extractRootsFromPower(ModulusWrapper* modEntryWrapper, ResidueWrapper* resi
 }
 
 bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModulusWrapper** restrict firstPtr, ModulusWrapper** restrict lastPtr, int64_t sqrtDivbound) {
-  libmontmul_t primeEntry = primeLibmontmul_t(prime);
-  ModulusWrapper first = makeModulusWrapper(primeEntry, NULL);
+  libmontmul_t primeMontmul_t = primeLibmontmul_t(prime);
+  ModulusWrapper first = makeModulusWrapper(primeMontmul_t, NULL);
   if (!checkThisPrime(&first, k)) {return false;}
   ResidueWrapper* residueWrapper = first.residueWrapper;
   *firstPtr = malloc(sizeof(ModulusWrapper));
@@ -132,14 +132,14 @@ bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModulusWrapper** re
   **lastPtr = first;
   ModulusWrapper last;
   uint64_t modulus = prime * prime;
-  libmontmul_t modEntry = powerLibmontmul_t(primeEntry, primeEntry);
+  libmontmul_t montmul_t = powerLibmontmul_t(primeMontmul_t, primeMontmul_t);
   while (modulus < sqrtDivbound) {
-    last = makeModulusWrapper(modEntry, *lastPtr);
-    (void)extractRootsFromPower(&last, residueWrapper, primeEntry, k);
+    last = makeModulusWrapper(montmul_t, *lastPtr);
+    (void)extractRootsFromPower(&last, residueWrapper, primeMontmul_t, k);
     *lastPtr = malloc(sizeof(ModulusWrapper));
     **lastPtr = last;
     modulus *= prime;
-    modEntry = powerLibmontmul_t(modEntry, primeEntry);
+    montmul_t = powerLibmontmul_t(montmul_t, primeMontmul_t);
     residueWrapper = last.residueWrapper;
   }
   return true;
@@ -176,17 +176,17 @@ bool isSolutionRunner(uint64_t residue, uint64_t modulus, uint64_t k, int64_t ol
 }
 
 bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  ModulusWrapper* modEntryWrapper;
-  libmontmul_t modEntry;
+  ModulusWrapper* modulusWrapper;
+  libmontmul_t montmul_t;
   ResidueWrapper* residueWrapper;
   uint64_t modulus;
   uint64_t residue;
   while (primeWrapper != NULL) {
-    modEntryWrapper = primeWrapper->last;
-    while (modEntryWrapper != NULL) {
-      modEntry = modEntryWrapper->modulus;
-      modulus = modEntry.modulus;
-      residueWrapper = modEntryWrapper->residueWrapper;
+    modulusWrapper = primeWrapper->last;
+    while (modulusWrapper != NULL) {
+      montmul_t = modulusWrapper->modulus;
+      modulus = montmul_t.modulus;
+      residueWrapper = modulusWrapper->residueWrapper;
       while (residueWrapper != NULL) {
         residue = residueWrapper->residue;
         if (isSolutionRunner(residue, modulus, k, oldDivbound, bound, oldBound)) {
@@ -194,7 +194,7 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbou
         }
         residueWrapper = residueWrapper->prev;
       }
-      modEntryWrapper = modEntryWrapper->prev;
+      modulusWrapper = modulusWrapper->prev;
     }
     
     primeWrapper = primeWrapper->prev;
@@ -204,95 +204,95 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbou
 
 bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
   PrimeWrapper* temp;
-  ModulusWrapper* firstModEntryWrapper;
-  ModulusWrapper* lastModEntryWrapper;
+  ModulusWrapper* firstMontmul_tWrapper;
+  ModulusWrapper* lastMontmul_tWrapper;
   uint64_t prime;
   while ((prime = primesieve_next_prime(primeIterator)) < sqrtDivbound) {
-    if (!checkSmallPowersOfThisPrime(prime, k, &firstModEntryWrapper, &lastModEntryWrapper, sqrtDivbound)) {continue;}    
+    if (!checkSmallPowersOfThisPrime(prime, k, &firstMontmul_tWrapper, &lastMontmul_tWrapper, sqrtDivbound)) {continue;}    
     temp = *primeWrapper;
     *primeWrapper = malloc(sizeof(PrimeWrapper));
-    **primeWrapper = makePrimeWrapper(firstModEntryWrapper, lastModEntryWrapper, temp);
+    **primeWrapper = makePrimeWrapper(firstMontmul_tWrapper, lastMontmul_tWrapper, temp);
   }
   return checkAllResidues(*primeWrapper, k, oldDivbound, bound, oldBound);
 }
 
-bool tryBaseCRT(ModulusWrapper** compositeWrapper, libmontmul_t modEntry, uint64_t residue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  const uint64_t MODULUS = modEntry.modulus;
+bool tryBaseCRT(ModulusWrapper** compositeWrapper, libmontmul_t montmul_t, uint64_t residue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+  const uint64_t MODULUS = montmul_t.modulus;
   if (isSolutionRunner(residue, MODULUS, k, oldDivbound, bound, oldBound)) {return true;}
   if (MODULUS > sqrtDivbound) {return false;}
   if (*compositeWrapper != NULL) {
-    ModulusWrapper* modEntryWrapperIterator = *compositeWrapper;
-    while (modEntryWrapperIterator != NULL) {
-      const libmontmul_t compositeEntry = modEntryWrapperIterator->modulus;
+    ModulusWrapper* modulusWrapperIterator = *compositeWrapper;
+    while (modulusWrapperIterator != NULL) {
+      const libmontmul_t compositeEntry = modulusWrapperIterator->modulus;
       if (compositeEntry.modulus == MODULUS) {
-        appendResidue(modEntryWrapperIterator, residue);
+        appendResidue(modulusWrapperIterator, residue);
         return false;
       }
-      modEntryWrapperIterator = modEntryWrapperIterator->prev;
+      modulusWrapperIterator = modulusWrapperIterator->prev;
     }
   }
   // Makes a new mod entry wrapperwrapper
   ModulusWrapper* OLD = *compositeWrapper;
   *compositeWrapper = malloc(sizeof(ModulusWrapper));
-  **compositeWrapper = makeModulusWrapper(modEntry, OLD);
+  **compositeWrapper = makeModulusWrapper(montmul_t, OLD);
   appendResidue(*compositeWrapper, residue);
   return false;
 }
 
-bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputModEntry, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound);
+bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound);
 
-bool crtSmallPowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputModEntry, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  ModulusWrapper* modEntryIterator = primeWrapper->last;
-  libmontmul_t iteratedModEntry, newModEntry;
+bool crtSmallPowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+  ModulusWrapper* montmul_tIterator = primeWrapper->last;
+  libmontmul_t iteratedMontmul_t, newMontmul_t;
   ResidueWrapper* residueWrapper;
   const uint64_t DIVBOUND = sqrtDivbound * sqrtDivbound;
   uint64_t newResidue;
-  while (modEntryIterator != NULL) {
-    iteratedModEntry = modEntryIterator->modulus;
-    if (inputModEntry.modulus * iteratedModEntry.modulus < DIVBOUND) {
-      newModEntry = compositeLibmontmul_t(inputModEntry, iteratedModEntry);
-      residueWrapper = modEntryIterator->residueWrapper;
+  while (montmul_tIterator != NULL) {
+    iteratedMontmul_t = montmul_tIterator->modulus;
+    if (inputMontmul_t.modulus * iteratedMontmul_t.modulus < DIVBOUND) {
+      newMontmul_t = compositeLibmontmul_t(inputMontmul_t, iteratedMontmul_t);
+      residueWrapper = montmul_tIterator->residueWrapper;
       while (residueWrapper != NULL) {
-        newResidue = crtCalc(inputResidue, inputModEntry, residueWrapper->residue, iteratedModEntry, newModEntry);
-        if (checkCRT(primeWrapper->prev, compositeWrapper, newModEntry, newResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
+        newResidue = crtCalc(inputResidue, inputMontmul_t, residueWrapper->residue, iteratedMontmul_t, newMontmul_t);
+        if (checkCRT(primeWrapper->prev, compositeWrapper, newMontmul_t, newResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
         residueWrapper = residueWrapper->prev;
       }
     }
-    modEntryIterator = modEntryIterator->prev;
+    montmul_tIterator = montmul_tIterator->prev;
   }
   return false;
 }
 
-bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputModEntry, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  const ModulusWrapper primeEntryWrapper = *(primeWrapper->first);
-  const libmontmul_t primeEntry = primeEntryWrapper.modulus;
+bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+  const ModulusWrapper primeMontmul_tWrapper = *(primeWrapper->first);
+  const libmontmul_t primeMontmul_t = primeMontmul_tWrapper.modulus;
   ModulusWrapper powerEntryWrapper = *(primeWrapper->last);
   ResidueWrapper* residueWrapper = powerEntryWrapper.residueWrapper;
-  libmontmul_t powerEntry = powerLibmontmul_t(powerEntryWrapper.modulus, primeEntry);
-  libmontmul_t newModEntry;
-  const uint64_t INPUT_MODULUS = inputModEntry.modulus;
+  libmontmul_t powerEntry = powerLibmontmul_t(powerEntryWrapper.modulus, primeMontmul_t);
+  libmontmul_t newMontmul_t;
+  const uint64_t INPUT_MODULUS = inputMontmul_t.modulus;
   const uint64_t DIVBOUND = sqrtDivbound * sqrtDivbound;
   uint64_t residue, newResidue;
   powerEntryWrapper = makeModulusWrapper(powerEntry, NULL);
   bool freeing = false, result = false;
   while (powerEntry.modulus * INPUT_MODULUS < DIVBOUND) {
-    newModEntry = compositeLibmontmul_t(powerEntry, inputModEntry);
-    (void)extractRootsFromPower(&powerEntryWrapper, residueWrapper, primeEntry, k);
+    newMontmul_t = compositeLibmontmul_t(powerEntry, inputMontmul_t);
+    (void)extractRootsFromPower(&powerEntryWrapper, residueWrapper, primeMontmul_t, k);
     if (freeing) {
       (void)freeResidueWrappers(residueWrapper);
     }
     residueWrapper = powerEntryWrapper.residueWrapper;
     while (residueWrapper != NULL) {
       residue = residueWrapper->residue;
-      newResidue = crtCalc(residue, powerEntry, inputResidue, inputModEntry, newModEntry);
-      if (checkCRT(primeWrapper, compositeWrapper, newModEntry, newResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {
+      newResidue = crtCalc(residue, powerEntry, inputResidue, inputMontmul_t, newMontmul_t);
+      if (checkCRT(primeWrapper, compositeWrapper, newMontmul_t, newResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {
         result = true;
         break;
       }
       residueWrapper = residueWrapper->prev;
     }
     residueWrapper = powerEntryWrapper.residueWrapper;
-    powerEntry = powerLibmontmul_t(powerEntry, primeEntry);
+    powerEntry = powerLibmontmul_t(powerEntry, primeMontmul_t);
     powerEntryWrapper = makeModulusWrapper(powerEntry, &powerEntryWrapper);
     if (result) {break;}
     if (!freeing) {
@@ -306,14 +306,14 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
 }
 
 // Runs Chinese Remainder Theorem to iterate over all available composite moduli.
-bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputModEntry, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
   if (primeWrapper == NULL) {
-    return tryBaseCRT(compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound);
+    return tryBaseCRT(compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound);
   }
-  if (checkCRT(primeWrapper->prev, compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
-  if (crtSmallPowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
-  if (inputModEntry.modulus > sqrtDivbound) {return false;}
-  if (crtLargePowers(primeWrapper, compositeWrapper, inputModEntry, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
+  if (checkCRT(primeWrapper->prev, compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
+  if (crtSmallPowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
+  if (inputMontmul_t.modulus > sqrtDivbound) {return false;}
+  if (crtLargePowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
   return false;
 }
 
@@ -322,20 +322,20 @@ bool checkSmallComposites(PrimeWrapper* primeWrapper, ModulusWrapper** composite
   return checkCRT(primeWrapper, compositeWrapper, ONE, 0, k, sqrtDivbound, oldDivbound, bound, oldBound);
 }
 
-bool checkLargeComposites(ModulusWrapper* compositeWrapper, libmontmul_t inputModEntry, uint64_t inputResidue, uint64_t k, int64_t divbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  libmontmul_t iteratedModEntry, newModEntry;
+bool checkLargeComposites(ModulusWrapper* compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t divbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+  libmontmul_t iteratedMontmul_t, newMontmul_t;
   ResidueWrapper* residueWrapper;
   uint64_t iteratedModulus, iteratedResidue, newResidue;
   while (compositeWrapper != NULL) {
-    iteratedModEntry = compositeWrapper->modulus;
-    iteratedModulus = iteratedModEntry.modulus;
-    if (iteratedModulus * inputModEntry.modulus < divbound) {
-      newModEntry = compositeLibmontmul_t(inputModEntry, iteratedModEntry);
+    iteratedMontmul_t = compositeWrapper->modulus;
+    iteratedModulus = iteratedMontmul_t.modulus;
+    if (iteratedModulus * inputMontmul_t.modulus < divbound) {
+      newMontmul_t = compositeLibmontmul_t(inputMontmul_t, iteratedMontmul_t);
       residueWrapper = compositeWrapper->residueWrapper;
       while (residueWrapper != NULL) {
         iteratedResidue = residueWrapper->residue;
-        newResidue = crtCalc(inputResidue, inputModEntry, iteratedResidue, iteratedModEntry, newModEntry);
-        if (isSolutionRunner(newResidue, newModEntry.modulus, k, oldDivbound, bound, oldBound)) {return true;}
+        newResidue = crtCalc(inputResidue, inputMontmul_t, iteratedResidue, iteratedMontmul_t, newMontmul_t);
+        if (isSolutionRunner(newResidue, newMontmul_t.modulus, k, oldDivbound, bound, oldBound)) {return true;}
         residueWrapper = residueWrapper->prev;
       }
     }
@@ -345,25 +345,25 @@ bool checkLargeComposites(ModulusWrapper* compositeWrapper, libmontmul_t inputMo
 }
 
 bool tryLargePrimes(ModulusWrapper* compositeWrapper, uint64_t k, primesieve_iterator* primeIterator, int64_t divbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  ModulusWrapper modEntryWrapper;
-  libmontmul_t modEntry;
+  ModulusWrapper modulusWrapper;
+  libmontmul_t montmul_t;
   ResidueWrapper* residueWrapper;
   bool result = false;
   uint64_t prime, residue;
   while ((prime = primesieve_next_prime(primeIterator)) < divbound) {
-    modEntry = primeLibmontmul_t(prime);
-    modEntryWrapper = makeModulusWrapper(modEntry, NULL);
-    if (!checkThisPrime(&modEntryWrapper, k)) {continue;}
-    residueWrapper = modEntryWrapper.residueWrapper;
+    montmul_t = primeLibmontmul_t(prime);
+    modulusWrapper = makeModulusWrapper(montmul_t, NULL);
+    if (!checkThisPrime(&modulusWrapper, k)) {continue;}
+    residueWrapper = modulusWrapper.residueWrapper;
     while (residueWrapper != NULL) {
       residue = residueWrapper->residue;
-      if (checkLargeComposites(compositeWrapper, modEntry, residue, k, divbound, oldDivbound, bound, oldBound)) {
+      if (checkLargeComposites(compositeWrapper, montmul_t, residue, k, divbound, oldDivbound, bound, oldBound)) {
         result = true;
         break;
       }
       residueWrapper = residueWrapper->prev;
     }
-    freeResidueWrappers(modEntryWrapper.residueWrapper);
+    freeResidueWrappers(modulusWrapper.residueWrapper);
     if (result) {break;}
   }
   return result;
