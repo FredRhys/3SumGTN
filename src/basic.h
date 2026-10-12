@@ -7,7 +7,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "formula.h"
-#include "../libdivide/libdivide.h"
+#include "libdivide.h"
 
 typedef struct libdivide_u64_t libdivide_u64_t;
 
