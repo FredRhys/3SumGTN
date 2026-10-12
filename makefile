@@ -11,16 +11,11 @@ CFLAGS = -std=c23\
 #   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
 
-.ONESHELL:
-SHELL := /bin/bash
-
 build/main: build/adv build/main.o
 	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o build/adv/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
 
 build/adv: build
-	@if [ ! -d build/adv ]; then
-	    mkdir build/adv
-	@fi
+	@if [ ! -d build/adv ]; then mkdir build/adv; echo "mkdir build/adv"; fi
 
 build: 
 	mkdir build
