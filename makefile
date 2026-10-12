@@ -3,25 +3,24 @@ LD = $(CC)
 CFLAGS = -std=c23\
 		 -Wall\
 		 -O3\
- 		 -pedantic
+ 		 -pedantic\
+		 -Ilibdivide\
+		 -Ilibmontmul\
+		 -Isrc/adv
 #   		 -g
 #   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
 
-buildfiles := build\
- build/main.o\
- build/basic.o\
- factor64/factor64.o\
- build/advanced.o\
- build/poly.o\
- build/montmul.o\
- build/wrappers.o\
- build/formula.o\
- build/preliminary.o\
- build/advancedRunner.o
+.ONESHELL:
+SHELL := /bin/bash
 
-build/main: $(buildfiles)
-	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
+build/main: build/adv build/main.o
+	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o build/adv/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
+
+build/adv: build
+	@if [ ! -d build/adv ]; then
+	    mkdir build/adv
+	@fi
 
 build: 
 	mkdir build
@@ -32,33 +31,33 @@ build/main.o: src/main.c build/basic.o build/advancedRunner.o
 build/basic.o: src/basic.c src/basic.h factor64/factor64.o
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
 
+build/advancedRunner.o: src/advancedRunner.c src/advancedRunner.h build/adv/advanced.o build/preliminary.o
+	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
+
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
 
-build/preliminary.o: src/preliminary.c src/preliminary.h build/formula.o
+build/preliminary.o: src/preliminary.c src/preliminary.h build/adv/formula.o
 	$(LD) $(CFLAGS) -c src/preliminary.c -o build/preliminary.o
 
-build/advanced.o: src/advanced.c src/advanced.h build/poly.o build/montmul.o build/wrappers.o build/formula.o
-	$(LD) $(CFLAGS) -c src/advanced.c -o build/advanced.o
+build/adv/advanced.o: src/adv/advanced.c src/adv/advanced.h build/adv/poly.o build/adv/montmul.o build/adv/wrappers.o build/adv/formula.o
+	$(LD) $(CFLAGS) -c src/adv/advanced.c -o build/adv/advanced.o
 
-build/poly.o: src/poly.c src/poly.h build/montmul.o
-	$(LD) $(CFLAGS) -c src/poly.c -o build/poly.o
+build/adv/poly.o: src/adv/poly.c src/adv/poly.h build/adv/montmul.o
+	$(LD) $(CFLAGS) -c src/adv/poly.c -o build/adv/poly.o
 
-build/wrappers.o: src/wrappers.c src/wrappers.h build/montmul.o
-	$(LD) $(CFLAGS) -c src/wrappers.c -o build/wrappers.o
+build/adv/wrappers.o: src/adv/wrappers.c src/adv/wrappers.h build/adv/montmul.o
+	$(LD) $(CFLAGS) -c src/adv/wrappers.c -o build/adv/wrappers.o
 
-build/montmul.o: libmontmul/montmul.c libmontmul/montmul.h
-	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/montmul.o
+build/adv/montmul.o: libmontmul/montmul.c libmontmul/montmul.h
+	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/adv/montmul.o
 
-build/formula.o: src/formula.c src/formula.h src/isQr.h
-	$(LD) $(CFLAGS) -c src/formula.c -o build/formula.o
-	
-build/advancedRunner.o: src/advancedRunner.c src/advancedRunner.h build/advanced.o
-	$(LD) $(CFLAGS) -c src/advancedRunner.c -o build/advancedRunner.o
+build/adv/formula.o: src/adv/formula.c src/adv/formula.h src/adv/isQr.h
+	$(LD) $(CFLAGS) -c src/adv/formula.c -o build/adv/formula.o
 
 .PHONY: clean
 clean:
-	rm -rf $(wildcard build/*)
+	rm -rf $(wildcard build/* build/adv/*)
 
 .PHONY: run
 run: run.sh
