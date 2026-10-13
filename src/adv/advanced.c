@@ -12,7 +12,7 @@ bool extractRootsFromQuad(Poly poly, ModulusWrapper* modulusWrapper) {
   const uint64_t NUMERATOR2 = submod(0, B + SQRT, PRIME);
   const uint64_t ROOT1 = montmul(NUMERATOR1, DENOMINATOR, MONTMUL_T);
   appendResidue(modulusWrapper, ROOT1);
-  if (NUMERATOR1 == NUMERATOR2) {return true;}
+  if(NUMERATOR1 == NUMERATOR2) {return true;}
   const uint64_t ROOT2 = montmul(NUMERATOR2, DENOMINATOR, MONTMUL_T);
   appendResidue(modulusWrapper, ROOT2);
   return true;
@@ -41,7 +41,7 @@ void checkOffsetIsRoot(ModulusWrapper* modulusWrapper, uint64_t _6k, uint64_t of
       appendResidue(modulusWrapper, offset);
       break;
     case 0:
-      if (applyMasterPoly(offset, MONTMUL_T, _6k) != 0) {break;}
+      breakif(applyMasterPoly(offset, MONTMUL_T, _6k) != 0);
       appendResidue(modulusWrapper, offset);
       break;
     default:
@@ -56,7 +56,7 @@ bool extractRootsFromPrime(ModulusWrapper* modulusWrapper, uint64_t k) {
   const uint64_t _6k = montmul(6, k, MONTMUL_T);
   for (uint64_t offset = 0; offset < PRIME; offset++) {
     rootPoly = getRootPoly(MONTMUL_T, _6k, offset);
-    if (degreeOfPoly(rootPoly) == 0) {continue;}
+    continueif(degreeOfPoly(rootPoly) == 0);
     const Poly GCD1 = gcdPoly(rootPoly, MONTMUL_T, _6k);
     rootPoly.deg0 = submod(rootPoly.deg0, 2, PRIME);
     const Poly GCD2 = gcdPoly(rootPoly, MONTMUL_T, _6k);
@@ -97,7 +97,7 @@ void extractRootsWithBruteForce(ModulusWrapper* modulusWrapper, uint64_t _6k) {
   const uint64_t MODULUS = MONTMUL_T.modulus;
   // TODO can determine number of roots with implemented tools
   for (uint64_t i = 0; i < MODULUS; i++) {
-    if (applyMasterPoly(i, MONTMUL_T, _6k) != 0) {continue;}
+    continueif(applyMasterPoly(i, MONTMUL_T, _6k) != 0);
     appendResidue(modulusWrapper, i);
   }
 }
@@ -154,19 +154,15 @@ static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SI
   const bool IS_MODULUS_SMALL = modulus < oldDivbound;
   libdivide_u64_t tripleDivisor = libdivide_u64_gen(3 * modulus);
   for (int64_t z = residue; isAbsLessThan(z, bound); z += INCREMENT) {
-    if (IS_MODULUS_SMALL && isAbsLessThan(z, oldBound)) {
-      /*
+    /*
       VERY STRANGE BUG
       this will not solve 10873 : -426 / 411 / 209 when
       the minBound = maxBound = 2^10,
       but is fine with minBound = 2^9 and maxBound = 2^11
       */
-      continue;
-    }
+    continueif(IS_MODULUS_SMALL && isAbsLessThan(z, oldBound));
     __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
-    if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {
-      return true;
-    }
+    if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {return true;}
   }
   return false;
 }
@@ -189,9 +185,7 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbou
       residueWrapper = modulusWrapper->residueWrapper;
       while (residueWrapper != NULL) {
         residue = residueWrapper->residue;
-        if (isSolutionRunner(residue, modulus, k, oldDivbound, bound, oldBound)) {
-          return true;
-        }
+        if (isSolutionRunner(residue, modulus, k, oldDivbound, bound, oldBound)) {return true;}
         residueWrapper = residueWrapper->prev;
       }
       modulusWrapper = modulusWrapper->prev;
@@ -208,7 +202,7 @@ bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterato
   ModulusWrapper* lastMontmul_tWrapper;
   uint64_t prime;
   while ((prime = primesieve_next_prime(primeIterator)) < sqrtDivbound) {
-    if (!checkSmallPowersOfThisPrime(prime, k, &firstMontmul_tWrapper, &lastMontmul_tWrapper, sqrtDivbound)) {continue;}    
+    continueif(!checkSmallPowersOfThisPrime(prime, k, &firstMontmul_tWrapper, &lastMontmul_tWrapper, sqrtDivbound));
     temp = *primeWrapper;
     *primeWrapper = malloc(sizeof(PrimeWrapper));
     **primeWrapper = makePrimeWrapper(firstMontmul_tWrapper, lastMontmul_tWrapper, temp);
@@ -294,7 +288,7 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
     residueWrapper = powerEntryWrapper.residueWrapper;
     powerEntry = powerLibmontmul_t(powerEntry, primeMontmul_t);
     powerEntryWrapper = makeModulusWrapper(powerEntry, &powerEntryWrapper);
-    if (result) {break;}
+    breakif(result);
     if (!freeing) {
       freeing = true;
     }
@@ -353,7 +347,7 @@ bool tryLargePrimes(ModulusWrapper* compositeWrapper, uint64_t k, primesieve_ite
   while ((prime = primesieve_next_prime(primeIterator)) < divbound) {
     montmul_t = primeLibmontmul_t(prime);
     modulusWrapper = makeModulusWrapper(montmul_t, NULL);
-    if (!checkThisPrime(&modulusWrapper, k)) {continue;}
+    continueif(!checkThisPrime(&modulusWrapper, k));
     residueWrapper = modulusWrapper.residueWrapper;
     while (residueWrapper != NULL) {
       residue = residueWrapper->residue;
@@ -364,7 +358,7 @@ bool tryLargePrimes(ModulusWrapper* compositeWrapper, uint64_t k, primesieve_ite
       residueWrapper = residueWrapper->prev;
     }
     freeResidueWrappers(modulusWrapper.residueWrapper);
-    if (result) {break;}
+    breakif(result);
   }
   return result;
 }
