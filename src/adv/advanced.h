@@ -10,6 +10,7 @@
 #include "poly.h"
 #include "wrappers.h"
 #include "formula.h"
+#include "returnif.h"
 
 #define UINT42_MAX 0x3FFFFFFFFFF
 
