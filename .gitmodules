@@ -7,3 +7,6 @@
 [submodule "factor64"]
 	path = factor64
 	url = https://github.com/arbooker/factor64
+[submodule "returnif"]
+	path = returnif
+	url = https://github.com/FredRhys/returnif
