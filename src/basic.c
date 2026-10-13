@@ -40,13 +40,12 @@ bool checkFormulaDividend(__int128_t dividend, uint64_t k, int64_t z) {
 }
 
 bool tryBasic(uint64_t k) {
-  bool result = false;
 	int64_t negBound = -2 * sqrtl(k);
   int64_t _6k = 6 * k;
   __int128_t dividend = -1;
-	for (int64_t z = negBound; dividend <= 0 && !result; z++) {
+	for (int64_t z = negBound; dividend <= 0; z++) {
 		dividend = (__int128_t)z * z * z - z - _6k;
-		if (checkFormulaDividend(dividend, k, z)) {result = true;}
+		if (checkFormulaDividend(dividend, k, z)) {return true;}
 	}
-	return result;
+	return false;
 }
