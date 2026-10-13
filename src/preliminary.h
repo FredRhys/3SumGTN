@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include "formula.h"
+#include "returnif.h"
 
 extern FILE* resultsDotTxt;
 
