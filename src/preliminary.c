@@ -10,11 +10,11 @@ bool tryPreliminary(uint64_t k, int64_t bound, int64_t oldBound) {
   const uint64_t _6k = 6 * k;
   int64_t x, radicand;
   for (int64_t y = -2 * sqrtl(k); y > -bound; y--) {
-    if (y > -oldBound) {continue;}
+    continueif(y > -oldBound);
     radicand = _6k + 2 * y * (1 - y * y);
     x = cbrtl(radicand);
     if (isSolution(x, y, radicand, k)) {return true;}
-    if (isSolution(x+1, y, radicand, k)) {return true;}    
+    if (isSolution(x+1, y, radicand, k)) {return true;}
   }
   return false;
 }
