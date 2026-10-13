@@ -63,11 +63,11 @@ bool checkFormulaResults(__int128_t dividand, uint64_t divisor, libdivide_u64_t*
 	if (disc < 0) {return false;}
 	const uint64_t DIVISOR_TIMES_3 = divisor * 3;
 	if (!isQrModSmallPrimes(disc * DIVISOR_TIMES_3)) {return false;}
-	const int64_t sqrtand = disc <= UINT64_MAX ? libdivide_u64_do(disc, tripleDivisor) : disc / DIVISOR_TIMES_3;
-	if (sqrtand * DIVISOR_TIMES_3 != disc) {return false;}
-	if ((divisor & 0b1) != (sqrtand & 0b1)) {return false;}
+	const int64_t RADICAND = disc <= UINT64_MAX ? libdivide_u64_do(disc, tripleDivisor) : disc / DIVISOR_TIMES_3;
+	if (RADICAND * DIVISOR_TIMES_3 != disc) {return false;}
+	if ((divisor & 0b1) != (RADICAND & 0b1)) {return false;}
 	uint64_t formulaSqrt;
-    if (!iSqrt128(sqrtand, &formulaSqrt)) {return false;}
+    if (!iSqrt128(RADICAND, &formulaSqrt)) {return false;}
 
 	int64_t x = (divisor+formulaSqrt)/2;
 	int64_t y = ((int64_t)divisor - (int64_t)formulaSqrt)/2;
