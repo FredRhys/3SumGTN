@@ -1,9 +1,9 @@
 #ifndef POLY_H
 #define POLY_H
 
-#include "montmul.h"
 #include <inttypes.h>
 #include <stdbit.h>
+#include "montmul.h"
 
 typedef struct libmontmul_t libmontmul_t;
 
