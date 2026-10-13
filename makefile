@@ -6,7 +6,8 @@ CFLAGS = -std=c23\
  		 -pedantic\
 		 -Ilibdivide\
 		 -Ilibmontmul\
-		 -Isrc/adv
+		 -Isrc/adv\
+		 -Ireturnif/src
 #   		 -g
 #   	 	 -fsanitize=address\
 #  		 -fsanitize=undefined
@@ -20,10 +21,10 @@ build/adv: build
 build: 
 	mkdir build
 
-build/main.o: src/main.c build/basic.o build/advancedRunner.o
+build/main.o: src/main.c returnif/src/returnif.h build/basic.o build/advancedRunner.o
 	$(LD) $(CFLAGS) -fopenmp -c src/main.c -o build/main.o
 
-build/basic.o: src/basic.c src/basic.h factor64/factor64.o
+build/basic.o: src/basic.c src/basic.h libdivide/libdivide.h factor64/factor64.o
 	$(LD) $(CFLAGS) -c src/basic.c -o build/basic.o
 
 build/advancedRunner.o: src/advancedRunner.c src/advancedRunner.h build/adv/advanced.o build/preliminary.o
@@ -32,10 +33,17 @@ build/advancedRunner.o: src/advancedRunner.c src/advancedRunner.h build/adv/adva
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
 
-build/preliminary.o: src/preliminary.c src/preliminary.h build/adv/formula.o
+build/preliminary.o: src/preliminary.c src/preliminary.h returnif/src/returnif.h build/adv/formula.o
 	$(LD) $(CFLAGS) -c src/preliminary.c -o build/preliminary.o
 
-build/adv/advanced.o: src/adv/advanced.c src/adv/advanced.h build/adv/poly.o build/adv/montmul.o build/adv/wrappers.o build/adv/formula.o
+build/adv/advanced.o: src/adv/advanced.c\
+ 					  src/adv/advanced.h\
+  					  libdivide/libdivide.h\
+   					  returnif/src/returnif.h\
+					  build/adv/poly.o\
+					  build/adv/montmul.o\
+					  build/adv/wrappers.o\
+					  build/adv/formula.o
 	$(LD) $(CFLAGS) -c src/adv/advanced.c -o build/adv/advanced.o
 
 build/adv/poly.o: src/adv/poly.c src/adv/poly.h build/adv/montmul.o
@@ -47,7 +55,7 @@ build/adv/wrappers.o: src/adv/wrappers.c src/adv/wrappers.h build/adv/montmul.o
 build/adv/montmul.o: libmontmul/montmul.c libmontmul/montmul.h
 	$(LD) $(CFLAGS) -c libmontmul/montmul.c -o build/adv/montmul.o
 
-build/adv/formula.o: src/adv/formula.c src/adv/formula.h src/adv/isQr.h
+build/adv/formula.o: src/adv/formula.c src/adv/formula.h libdivide/libdivide.h src/adv/isQr.h
 	$(LD) $(CFLAGS) -c src/adv/formula.c -o build/adv/formula.o
 
 .PHONY: clean
