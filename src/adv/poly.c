@@ -96,9 +96,7 @@ Poly gcdPoly(Poly operand, libmontmul_t montmul_t, uint64_t _6k) {
 				if (numerator == 0) {
 					return operand;
 				}
-				else {
-					goto fail;
-				}
+        goto fail;
 			}
 			operand = makePoly(0, 1, montmul(numerator, invmod(denominator, montmul_t), montmul_t));
 	}
