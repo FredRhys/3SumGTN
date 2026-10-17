@@ -121,7 +121,7 @@ void extractRootsFromPower(ModulusWrapper* modulusWrapper, ResidueWrapper* resid
   }
 }
 
-bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModulusWrapper** restrict firstPtr, ModulusWrapper** restrict lastPtr, int64_t sqrtDivbound) {
+bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModulusWrapper** restrict firstPtr, ModulusWrapper** restrict lastPtr, bounds_t bounds) {
   libmontmul_t primeMontmul_t = primeLibmontmul_t(prime);
   ModulusWrapper first = makeModulusWrapper(primeMontmul_t, NULL);
   if (!checkThisPrime(&first, k)) {return false;}
@@ -133,7 +133,8 @@ bool checkSmallPowersOfThisPrime(uint64_t prime, uint64_t k, ModulusWrapper** re
   ModulusWrapper last;
   uint64_t modulus = prime * prime;
   libmontmul_t montmul_t = powerLibmontmul_t(primeMontmul_t, primeMontmul_t);
-  while (modulus < sqrtDivbound) {
+  const int64_t SQRT_DIVBOUND = bounds.sqrtDivbound;
+  while (modulus < SQRT_DIVBOUND) {
     last = makeModulusWrapper(montmul_t, *lastPtr);
     (void)extractRootsFromPower(&last, residueWrapper, primeMontmul_t, k);
     *lastPtr = malloc(sizeof(ModulusWrapper));
@@ -149,29 +150,30 @@ static inline bool isAbsLessThan(int64_t operand, int64_t boundary) {
   return operand > -boundary && operand < boundary;
 }
 
-static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SIGN, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SIGN, bounds_t bounds) {
   const int64_t INCREMENT = SIGN * modulus;
-  const bool IS_MODULUS_SMALL = modulus < oldDivbound;
+  const int64_t BOUND = bounds.bound;
+  const int64_t OLD_BOUND = bounds.oldBound;
+  const bool IS_MODULUS_SMALL = modulus < bounds.oldDivbound;
   libdivide_u64_t tripleDivisor = libdivide_u64_gen(3 * modulus);
-  for (int64_t z = residue; isAbsLessThan(z, bound); z += INCREMENT) {
+  for (int64_t z = residue; isAbsLessThan(z, BOUND); z += INCREMENT) {
     /*
       VERY STRANGE BUG
       this will not solve 10873 : -426 / 411 / 209 when
-      the minBound = maxBound = 2^10,
-      but is fine with minBound = 2^9 and maxBound = 2^11
+      the minBound = 2^10
       */
-    continueif(IS_MODULUS_SMALL && isAbsLessThan(z, oldBound));
+    continueif(IS_MODULUS_SMALL && isAbsLessThan(z, OLD_BOUND));
     __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
     if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {return true;}
   }
   return false;
 }
 
-bool isSolutionRunner(uint64_t residue, uint64_t modulus, uint64_t k, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
-  return isSolution(modulus, k, residue, 1, oldDivbound, bound, oldBound) || isSolution(modulus, k, residue, -1, oldDivbound, bound, oldBound);
+bool isSolutionRunner(uint64_t residue, uint64_t modulus, uint64_t k, bounds_t bounds) {
+  return isSolution(modulus, k, residue, 1, bounds) || isSolution(modulus, k, residue, -1, bounds);
 }
 
-bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, bounds_t bounds) {
   ModulusWrapper* modulusWrapper;
   libmontmul_t montmul_t;
   ResidueWrapper* residueWrapper;
@@ -185,7 +187,7 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbou
       residueWrapper = modulusWrapper->residueWrapper;
       while (residueWrapper != NULL) {
         residue = residueWrapper->residue;
-        if (isSolutionRunner(residue, modulus, k, oldDivbound, bound, oldBound)) {return true;}
+        if (isSolutionRunner(residue, modulus, k, bounds)) {return true;}
         residueWrapper = residueWrapper->prev;
       }
       modulusWrapper = modulusWrapper->prev;
@@ -196,24 +198,25 @@ bool checkAllResidues(PrimeWrapper* primeWrapper, uint64_t k, uint64_t oldDivbou
   return false;
 }
 
-bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterator, PrimeWrapper** primeWrapper, bounds_t bounds) {
   PrimeWrapper* temp;
   ModulusWrapper* firstMontmul_tWrapper;
   ModulusWrapper* lastMontmul_tWrapper;
   uint64_t prime;
-  while ((prime = primesieve_next_prime(primeIterator)) < sqrtDivbound) {
-    continueif(!checkSmallPowersOfThisPrime(prime, k, &firstMontmul_tWrapper, &lastMontmul_tWrapper, sqrtDivbound));
+  const int64_t SQRT_DIVBOUND = bounds.sqrtDivbound;
+  while ((prime = primesieve_next_prime(primeIterator)) < SQRT_DIVBOUND) {
+    continueif(!checkSmallPowersOfThisPrime(prime, k, &firstMontmul_tWrapper, &lastMontmul_tWrapper, bounds));
     temp = *primeWrapper;
     *primeWrapper = malloc(sizeof(PrimeWrapper));
     **primeWrapper = makePrimeWrapper(firstMontmul_tWrapper, lastMontmul_tWrapper, temp);
   }
-  return checkAllResidues(*primeWrapper, k, oldDivbound, bound, oldBound);
+  return checkAllResidues(*primeWrapper, k, bounds);
 }
 
-bool tryBaseCRT(ModulusWrapper** compositeWrapper, libmontmul_t montmul_t, uint64_t residue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool tryBaseCRT(ModulusWrapper** compositeWrapper, libmontmul_t montmul_t, uint64_t residue, uint64_t k, bounds_t bounds) {
   const uint64_t MODULUS = montmul_t.modulus;
-  if (isSolutionRunner(residue, MODULUS, k, oldDivbound, bound, oldBound)) {return true;}
-  if (MODULUS > sqrtDivbound) {return false;}
+  if (isSolutionRunner(residue, MODULUS, k, bounds)) {return true;}
+  if (MODULUS >  bounds.sqrtDivbound) {return false;}
   if (*compositeWrapper != NULL) {
     ModulusWrapper* modulusWrapperIterator = *compositeWrapper;
     while (modulusWrapperIterator != NULL) {
@@ -233,13 +236,13 @@ bool tryBaseCRT(ModulusWrapper** compositeWrapper, libmontmul_t montmul_t, uint6
   return false;
 }
 
-bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound);
+bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, bounds_t bounds);
 
-bool crtSmallPowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool crtSmallPowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, bounds_t bounds) {
   ModulusWrapper* montmul_tIterator = primeWrapper->last;
   libmontmul_t iteratedMontmul_t, newMontmul_t;
   ResidueWrapper* residueWrapper;
-  const uint64_t DIVBOUND = sqrtDivbound * sqrtDivbound;
+  const int64_t DIVBOUND = bounds.divbound;
   uint64_t newResidue;
   while (montmul_tIterator != NULL) {
     iteratedMontmul_t = montmul_tIterator->modulus;
@@ -248,7 +251,7 @@ bool crtSmallPowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
       residueWrapper = montmul_tIterator->residueWrapper;
       while (residueWrapper != NULL) {
         newResidue = crtCalc(inputResidue, inputMontmul_t, residueWrapper->residue, iteratedMontmul_t, newMontmul_t);
-        if (checkCRT(primeWrapper->prev, compositeWrapper, newMontmul_t, newResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
+        if (checkCRT(primeWrapper->prev, compositeWrapper, newMontmul_t, newResidue, k, bounds)) {return true;}
         residueWrapper = residueWrapper->prev;
       }
     }
@@ -257,7 +260,7 @@ bool crtSmallPowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
   return false;
 }
 
-bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, bounds_t bounds) {
   const ModulusWrapper primeMontmul_tWrapper = *(primeWrapper->first);
   const libmontmul_t primeMontmul_t = primeMontmul_tWrapper.modulus;
   ModulusWrapper powerEntryWrapper = *(primeWrapper->last);
@@ -265,7 +268,7 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
   libmontmul_t powerEntry = powerLibmontmul_t(powerEntryWrapper.modulus, primeMontmul_t);
   libmontmul_t newMontmul_t;
   const uint64_t INPUT_MODULUS = inputMontmul_t.modulus;
-  const uint64_t DIVBOUND = sqrtDivbound * sqrtDivbound;
+  const int64_t DIVBOUND = bounds.divbound;
   uint64_t residue, newResidue;
   powerEntryWrapper = makeModulusWrapper(powerEntry, NULL);
   bool freeing = false, result = false;
@@ -279,7 +282,7 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
     while (residueWrapper != NULL) {
       residue = residueWrapper->residue;
       newResidue = crtCalc(residue, powerEntry, inputResidue, inputMontmul_t, newMontmul_t);
-      if (checkCRT(primeWrapper, compositeWrapper, newMontmul_t, newResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {
+      if (checkCRT(primeWrapper, compositeWrapper, newMontmul_t, newResidue, k, bounds)) {
         result = true;
         break;
       }
@@ -300,36 +303,38 @@ bool crtLargePowers(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrappe
 }
 
 // Runs Chinese Remainder Theorem to iterate over all available composite moduli.
-bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, bounds_t bounds) {
   if (primeWrapper == NULL) {
-    return tryBaseCRT(compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound);
+    return tryBaseCRT(compositeWrapper, inputMontmul_t, inputResidue, k, bounds);
   }
-  if (checkCRT(primeWrapper->prev, compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
-  if (crtSmallPowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
-  if (inputMontmul_t.modulus > sqrtDivbound) {return false;}
-  if (crtLargePowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, sqrtDivbound, oldDivbound, bound, oldBound)) {return true;}
+  if (checkCRT(primeWrapper->prev, compositeWrapper, inputMontmul_t, inputResidue, k, bounds)) {return true;}
+  if (crtSmallPowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, bounds)) {return true;}
+  if (inputMontmul_t.modulus > bounds.sqrtDivbound) {return false;}
+  if (crtLargePowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, bounds)) {return true;}
   return false;
 }
 
-bool checkSmallComposites(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, uint64_t k, int64_t sqrtDivbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool checkSmallComposites(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, uint64_t k, bounds_t bounds) {
   const libmontmul_t ONE = makeLibmontmul_t(1, 18446744073709551615ULL, 0, 1); // precomputed values
-  return checkCRT(primeWrapper, compositeWrapper, ONE, 0, k, sqrtDivbound, oldDivbound, bound, oldBound);
+  return checkCRT(primeWrapper, compositeWrapper, ONE, 0, k, bounds);
 }
 
-bool checkLargeComposites(ModulusWrapper* compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, int64_t divbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool checkLargeComposites(ModulusWrapper* compositeWrapper, libmontmul_t inputMontmul_t, uint64_t inputResidue, uint64_t k, bounds_t bounds) {
   libmontmul_t iteratedMontmul_t, newMontmul_t;
   ResidueWrapper* residueWrapper;
   uint64_t iteratedModulus, iteratedResidue, newResidue;
+  const int64_t DIVBOUND = bounds.divbound;
+  const int64_t INPUT_MODULUS = inputMontmul_t.modulus;
   while (compositeWrapper != NULL) {
     iteratedMontmul_t = compositeWrapper->modulus;
     iteratedModulus = iteratedMontmul_t.modulus;
-    if (iteratedModulus * inputMontmul_t.modulus < divbound) {
+    if (iteratedModulus * INPUT_MODULUS < DIVBOUND) {
       newMontmul_t = compositeLibmontmul_t(inputMontmul_t, iteratedMontmul_t);
       residueWrapper = compositeWrapper->residueWrapper;
       while (residueWrapper != NULL) {
         iteratedResidue = residueWrapper->residue;
         newResidue = crtCalc(inputResidue, inputMontmul_t, iteratedResidue, iteratedMontmul_t, newMontmul_t);
-        if (isSolutionRunner(newResidue, newMontmul_t.modulus, k, oldDivbound, bound, oldBound)) {return true;}
+        if (isSolutionRunner(newResidue, newMontmul_t.modulus, k, bounds)) {return true;}
         residueWrapper = residueWrapper->prev;
       }
     }
@@ -338,20 +343,21 @@ bool checkLargeComposites(ModulusWrapper* compositeWrapper, libmontmul_t inputMo
   return false;
 }
 
-bool tryLargePrimes(ModulusWrapper* compositeWrapper, uint64_t k, primesieve_iterator* primeIterator, int64_t divbound, int64_t oldDivbound, int64_t bound, int64_t oldBound) {
+bool tryLargePrimes(ModulusWrapper* compositeWrapper, uint64_t k, primesieve_iterator* primeIterator, bounds_t bounds) {
   ModulusWrapper modulusWrapper;
   libmontmul_t montmul_t;
   ResidueWrapper* residueWrapper;
   bool result = false;
   uint64_t prime, residue;
-  while ((prime = primesieve_next_prime(primeIterator)) < divbound) {
+  const int64_t DIVBOUND = bounds.divbound;
+  while ((prime = primesieve_next_prime(primeIterator)) < DIVBOUND) {
     montmul_t = primeLibmontmul_t(prime);
     modulusWrapper = makeModulusWrapper(montmul_t, NULL);
     continueif(!checkThisPrime(&modulusWrapper, k));
     residueWrapper = modulusWrapper.residueWrapper;
     while (residueWrapper != NULL) {
       residue = residueWrapper->residue;
-      if (checkLargeComposites(compositeWrapper, montmul_t, residue, k, divbound, oldDivbound, bound, oldBound)) {
+      if (checkLargeComposites(compositeWrapper, montmul_t, residue, k, bounds)) {
         result = true;
         break;
       }
@@ -363,21 +369,20 @@ bool tryLargePrimes(ModulusWrapper* compositeWrapper, uint64_t k, primesieve_ite
   return result;
 }
 
-bool tryAdvanced(uint64_t k, int64_t bound, int64_t divbound, int64_t oldBound, int64_t oldDivbound) {
+bool tryAdvanced(uint64_t k, bounds_t bounds) {
   primesieve_iterator primeIterator;
   (void)primesieve_init(&primeIterator);
   PrimeWrapper* primeWrapper = NULL;
   ModulusWrapper* compositeWrapper = NULL;
   bool result = false;
-  const uint64_t SQRT_DIVBOUND = sqrtf(divbound) + 1;
 
-  if (checkSmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapper, SQRT_DIVBOUND, oldDivbound, bound, oldBound)) {
+  if (checkSmallPowersOfSmallPrimes(k, &primeIterator, &primeWrapper, bounds)) {
     result = true;
   }
-  else if (checkSmallComposites(primeWrapper, &compositeWrapper, k, SQRT_DIVBOUND, oldDivbound, bound, oldBound)) {
+  else if (checkSmallComposites(primeWrapper, &compositeWrapper, k, bounds)) {
     result = true;
   }
-  else if (tryLargePrimes(compositeWrapper, k, &primeIterator, divbound, oldDivbound, bound, oldBound)) {
+  else if (tryLargePrimes(compositeWrapper, k, &primeIterator, bounds)) {
     result = true;
   }
   (void)freePrimeWrappers(primeWrapper);
