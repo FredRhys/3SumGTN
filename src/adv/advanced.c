@@ -157,11 +157,6 @@ static bool isSolution(uint64_t modulus, uint64_t k, uint64_t residue, int8_t SI
   const bool IS_MODULUS_SMALL = modulus < bounds.oldDivbound;
   libdivide_u64_t tripleDivisor = libdivide_u64_gen(3 * modulus);
   for (int64_t z = residue; isAbsLessThan(z, BOUND); z += INCREMENT) {
-    /*
-      VERY STRANGE BUG
-      this will not solve 10873 : -426 / 411 / 209 when
-      the minBound = 2^10
-      */
     continueif(IS_MODULUS_SMALL && isAbsLessThan(z, OLD_BOUND));
     __int128_t dividand = (__int128_t)z * z * z - z - 6 * k;
     if (checkFormulaResults(dividand, modulus, &tripleDivisor, k, z)) {return true;}
@@ -216,7 +211,7 @@ bool checkSmallPowersOfSmallPrimes(uint64_t k, primesieve_iterator* primeIterato
 bool tryBaseCRT(ModulusWrapper** compositeWrapper, libmontmul_t montmul_t, uint64_t residue, uint64_t k, bounds_t bounds) {
   const uint64_t MODULUS = montmul_t.modulus;
   if (isSolutionRunner(residue, MODULUS, k, bounds)) {return true;}
-  if (MODULUS >  bounds.sqrtDivbound) {return false;}
+  if (MODULUS >= bounds.sqrtDivbound) {return false;}
   if (*compositeWrapper != NULL) {
     ModulusWrapper* modulusWrapperIterator = *compositeWrapper;
     while (modulusWrapperIterator != NULL) {
@@ -309,7 +304,7 @@ bool checkCRT(PrimeWrapper* primeWrapper, ModulusWrapper** compositeWrapper, lib
   }
   if (checkCRT(primeWrapper->prev, compositeWrapper, inputMontmul_t, inputResidue, k, bounds)) {return true;}
   if (crtSmallPowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, bounds)) {return true;}
-  if (inputMontmul_t.modulus > bounds.sqrtDivbound) {return false;}
+  if (inputMontmul_t.modulus >= bounds.sqrtDivbound) {return false;}
   if (crtLargePowers(primeWrapper, compositeWrapper, inputMontmul_t, inputResidue, k, bounds)) {return true;}
   return false;
 }
@@ -382,8 +377,11 @@ bool tryAdvanced(uint64_t k, bounds_t bounds) {
   else if (checkSmallComposites(primeWrapper, &compositeWrapper, k, bounds)) {
     result = true;
   }
-  else if (tryLargePrimes(compositeWrapper, k, &primeIterator, bounds)) {
-    result = true;
+  else {
+    primesieve_jump_to(&primeIterator, bounds.sqrtDivbound, bounds.divbound);
+    if (tryLargePrimes(compositeWrapper, k, &primeIterator, bounds)) {
+      result = true;
+    }
   }
   (void)freePrimeWrappers(primeWrapper);
   (void)freeModulusWrappers(compositeWrapper);
