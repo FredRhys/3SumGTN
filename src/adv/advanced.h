@@ -1,10 +1,10 @@
 #ifndef ADVANCED_H
 #define ADVANCED_H
 
-#include <primesieve.h>
 #include <stdbool.h>
 #include <stdlib.h> // for malloc
 #include <inttypes.h>
+#include "primesieve.h"
 #include "montmul.h" // this is included by poly.h
 #include "libdivide.h"
 #include "poly.h"
