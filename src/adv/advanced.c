@@ -21,11 +21,12 @@ bool extractRootsFromQuad(Poly poly, ModulusWrapper* modulusWrapper) {
 bool extractRoots(Poly poly, ModulusWrapper* modulusWrapper) {
   const libmontmul_t MONTMUL_T = modulusWrapper->modulus;
   const uint64_t PRIME = MONTMUL_T.modulus;
+  uint64_t root;
   switch (degreeOfPoly(poly)) {
     case 2:
       return extractRootsFromQuad(poly, modulusWrapper);
     case 1:
-      uint64_t root = submod(0, poly.deg0, PRIME);
+      root = submod(0, poly.deg0, PRIME);
       appendResidue(modulusWrapper, root);
       return true;
     default:
