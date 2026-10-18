@@ -1,7 +1,8 @@
 CC = gcc
 LD = $(CC)
-CFLAGS = -std=c23\
+CFLAGS = -std=c11\
 		 -Wall\
+		 -Werror\
 		 -O3\
  		 -pedantic\
 		 -Ilibdivide\
