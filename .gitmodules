@@ -10,3 +10,6 @@
 [submodule "returnif"]
 	path = returnif
 	url = https://github.com/FredRhys/returnif
+[submodule "primesieve"]
+	path = primesieve
+	url = https://github.com/kimwalisch/primesieve
