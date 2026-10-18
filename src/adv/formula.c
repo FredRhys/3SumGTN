@@ -10,35 +10,33 @@ bool iSqrt128(__uint128_t operand, uint64_t *result) {
 		if (result != NULL) {*result = operand;}
 		return true;
 	}
-	const uint8_t m = myBitWidth(operand);
-	uint64_t s = (uint64_t)sqrtl((long double)operand);
-	__uint128_t sq = (__uint128_t)s * s;
-	if (m <= 64) {
-exact:
+	const uint8_t bitWidth = myBitWidth(operand);
+	const uint8_t excessBitWidth = bitWidth - 64;
+	uint64_t root = (uint64_t)sqrtl((long double)operand);
+	__uint128_t sq = (__uint128_t)root * root;
+	if (bitWidth <= 64 || (operand & ((1LL << excessBitWidth)-1)) == 0) {
 		if (sq == operand) {
-			if (result != NULL) {*result = s;}
+			if (result != NULL) {*result = root;}
 			return true;
 		}
 		return false;
 	}
-	const uint8_t n = m - 64;
-	if ((operand & (n-1)) == 0) {goto exact;}
-	const uint8_t exponent = ((n & 1) == 0) ? (n/2) : (n+1)/2;
-	uint64_t high = s + (1<<exponent);
-	uint64_t low = s - (1<<exponent);
+	const uint8_t exponent = ((excessBitWidth & 1) == 0) ? (excessBitWidth/2) : (excessBitWidth+1)/2;
+	uint64_t high = root + (1LL<<exponent);
+	uint64_t low = root - (1LL<<exponent);
 	while (low <= high) {
 		if (sq > operand) {
-			high = s - 1;
+			high = root - 1;
 		}
 		else if (sq < operand) {
-			low = s + 1;
+			low = root + 1;
 		}
 		else {
-            if (result != NULL) {*result = s;}
+      if (result != NULL) {*result = root;}
 			return true;
 		}
-		s = (high + low) / 2;
-		sq = (__uint128_t)s * s;
+		root = (high + low) / 2;
+		sq = (__uint128_t)root * root;
 	}
 	return false;
 }
