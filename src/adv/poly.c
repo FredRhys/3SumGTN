@@ -58,7 +58,7 @@ Poly getRootPoly(libmontmul_t montmul_t, uint64_t int_6k, uint64_t offset) {
   Poly result = makePoly(0, 0, 1);
 
   while (exponent > 0) {
-    if ((exponent & 0b1) == 1) {
+    if ((exponent & 1) == 1) {
       result = mulPoly(result, base, montmul_t, int_6k);
     }
     base = mulPoly(base, base, montmul_t, int_6k);
