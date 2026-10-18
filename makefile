@@ -7,13 +7,11 @@ CFLAGS = -std=c23\
 		 -Ilibdivide\
 		 -Ilibmontmul\
 		 -Isrc/adv\
-		 -Ireturnif/src
-#   		 -g
-#   	 	 -fsanitize=address\
-#  		 -fsanitize=undefined
+		 -Ireturnif/src\
+		 -Iprimesieve/include
 
-build/main: build/adv build/main.o
-	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o build/adv/*.o) factor64/factor64.o -o build/main -lm -lprimesieve
+build/main: build/adv build/main.o primesieve/libprimesieve.so
+	$(LD) $(CFLAGS) -fopenmp $(wildcard build/*.o build/adv/*.o) factor64/factor64.o -o build/main  -lm -L./primesieve -lprimesieve 
 
 build/adv: build
 	@if [ ! -d build/adv ]; then mkdir build/adv; echo "mkdir build/adv"; fi
@@ -33,6 +31,10 @@ build/advancedRunner.o: src/advancedRunner.c src/advancedRunner.h build/adv/adva
 factor64/factor64.o:
 	cd factor64 && $(MAKE) factor64.o
 
+primesieve/libprimesieve.so:
+	cd primesieve/ && cmake .
+	cd primesieve/ && cmake --build . --parallel
+
 build/preliminary.o: src/preliminary.c src/preliminary.h returnif/src/returnif.h build/adv/formula.o
 	$(LD) $(CFLAGS) -c src/preliminary.c -o build/preliminary.o
 
@@ -40,6 +42,7 @@ build/adv/advanced.o: src/adv/advanced.c\
  					  src/adv/advanced.h\
   					  libdivide/libdivide.h\
    					  returnif/src/returnif.h\
+					  primesieve/include/primesieve.h\
 					  build/adv/poly.o\
 					  build/adv/montmul.o\
 					  build/adv/wrappers.o\
