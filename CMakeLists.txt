@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.11.0)
 project(SEARCH)
 find_package(OpenMP REQUIRED)
-add_compile_options("-O3" "-Wall" "-Werror" "-pedantic" ${OpenMP_CXX_FLAGS})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
 
 add_executable(search
@@ -14,6 +13,8 @@ add_executable(search
     ${PROJECT_SOURCE_DIR}/src/main.c
     ${PROJECT_SOURCE_DIR}/src/preliminary.c
 )
+
+target_compile_options(search PRIVATE "-O3" "-Wall" "-Werror" "-pedantic" ${OpenMP_CXX_FLAGS})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/factor64 EXCLUDE_FROM_ALL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/primesieve EXCLUDE_FROM_ALL)
