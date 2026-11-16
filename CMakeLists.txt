@@ -22,12 +22,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/libmontmul EXCLUDE_FROM_ALL)
 
 target_include_directories(search
     PRIVATE
-        $(CMAKE_CURRENT_LIST_DIR)/libdivide
-        $(CMAKE_CURRENT_LIST_DIR)/libmontmul/src
-        $(CMAKE_CURRENT_LIST_DIR)/primesieve/include
-        $(CMAKE_CURRENT_LIST_DIR)/returnif/src
-        $(CMAKE_CURRENT_LIST_DIR)/src
-        $(CMAKE_CURRENT_LIST_DIR)/src/adv
+        ${PROJECT_SOURCE_DIR}/libdivide
+        ${PROJECT_SOURCE_DIR}/libmontmul/src
+        ${PROJECT_SOURCE_DIR}/primesieve/include
+        ${PROJECT_SOURCE_DIR}/returnif/src
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/adv
 )
 
 target_link_libraries(search
