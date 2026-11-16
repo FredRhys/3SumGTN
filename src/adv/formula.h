@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <inttypes.h>
-#include <stdbit.h>
 #include "libdivide.h"
 #include "isQr.h"
 

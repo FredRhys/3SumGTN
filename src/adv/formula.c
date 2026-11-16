@@ -1,8 +1,8 @@
 #include "formula.h"
 
 uint8_t myBitWidth(__uint128_t operand) {
-    if (operand <= UINT64_MAX) {return stdc_bit_width_ull((uint64_t)operand);}
-    return 64 + stdc_bit_width_ull(operand >> 64);
+    if (operand <= UINT64_MAX) {return __builtin_stdc_bit_width((uint64_t)operand);}
+    return 64 + __builtin_stdc_bit_width(operand >> 64);
 }
 
 bool iSqrt128(__uint128_t operand, uint64_t *result) {
