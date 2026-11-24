@@ -32,12 +32,12 @@ N.B. the new method is not that which was described in the original paper.
 
 // 5 * 7 * 11 * 13 = 5005. Reducing mod 5005 once lets all four tests use cheap 64-bit ops.
 #define QR_PRODUCT 5005u
-#define QR_TWO_POW_64_MOD (((__uint128_t)1 << 64) % QR_PRODUCT)
+const static uint32_t QR_TWO_POW_64_MOD = (((__uint128_t)1 << 64) % QR_PRODUCT);
 
 static inline bool isQrModSmallPrimes(__uint128_t operand) {
   const uint64_t hi = (uint64_t)(operand >> 64);
   const uint64_t lo = (uint64_t)operand;
-  const uint64_t r = (hi % QR_PRODUCT * QR_TWO_POW_64_MOD + lo % QR_PRODUCT) % QR_PRODUCT;
+  const uint32_t r = ((hi % QR_PRODUCT) * QR_TWO_POW_64_MOD + lo % QR_PRODUCT) % QR_PRODUCT;
   return ((QR_MASK_5 >> (r % 5)) & 1)
     && ((QR_MASK_7 >> (r % 7)) & 1)
     && ((QR_MASK_11 >> (r % 11)) & 1)
