@@ -53,7 +53,7 @@ void fprintfResults(int64_t x, int64_t y, int64_t z, uint64_t k) {
 	z = adjustSolutions(z);
 	x = adjustSolutions(x);
 	y = adjustSolutions(y);
-	(void)fprintf(resultsDotTxt, "%"PRId64" : %"PRIu64" / %"PRIu64" / %"PRIu64"\n", k, x, y, z);
+	(void)fprintf(resultsDotTxt, "%"PRIu64" : %"PRId64" / %"PRId64" / %"PRId64"\n", k, x, y, z);
 }
 
 bool checkFormulaResults(__int128_t dividand, uint64_t divisor, libdivide_u64_t* tripleDivisor, uint64_t k, int64_t z) {
